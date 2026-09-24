@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>勇者育成台帳 - ステータス計算機</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing: border-box;
+  --ink:#eae4d3;
+  --ink-dim:#a89f8a;
+  --bg:#14161f;
+  --bg-panel:#1c1f2c;
+  --bg-panel-raised:#242838;
+  --line:#343a4d;
+  --gold:#c9a227;
+  --gold-soft:#8a7429;
+  --ok:#5a9c6f;
+  --ok-bg:#1c2b21;
+  --ng:#b2503f;
+  --ng-bg:#2b1c1c;
+  --mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+:root:not([data-theme="light"]){ }
+:root[data-theme="light"]{
+  --ink:#2c2617;
+  --ink-dim:#6b6250;
+  --bg:#f2e9d8;
+  --bg-panel:#fbf5e8;
+  --bg-panel-raised:#ffffff;
+  --line:#ddd0b0;
+  --gold:#96731a;
+  --gold-soft:#b08c2a;
+  --ok:#2f7a49;
+  --ok-bg:#e2f0e4;
+  --ng:#a13e2f;
+  --ng-bg:#f5e2df;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]){
+    --ink:#2c2617;
+    --ink-dim:#6b6250;
+    --bg:#f2e9d8;
+    --bg-panel:#fbf5e8;
+    --bg-panel-raised:#ffffff;
+    --line:#ddd0b0;
+    --gold:#96731a;
+    --gold-soft:#b08c2a;
+    --ok:#2f7a49;
+    --ok-bg:#e2f0e4;
+    --ng:#a13e2f;
+    --ng-bg:#f5e2df;
+  }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+  line-height: 1.6;
+}
+.wrap{
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 20px 80px;
+}
+header.top{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 18px;
+}
+h1{
+  font-family: 'Shippori Mincho', serif;
+  font-weight: 700;
+  font-size: clamp(22px, 4vw, 32px);
+  margin: 0;
+  letter-spacing: .04em;
+  color: var(--gold);
+}
+h1 small{
+  display:block;
+  font-family: -apple-system, sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--ink-dim);
+  letter-spacing: .1em;
+  margin-top: 4px;
+}
+.theme-toggle{
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink-dim);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.theme-toggle:hover{ border-color: var(--gold-soft); color: var(--gold); }
+
+.grid{
+  display:grid;
+  grid-template-columns: 340px 1fr;
+  gap: 22px;
+  align-items:start;
+}
+@media (max-width: 860px){
+  .grid{ grid-template-columns: 1fr; }
+}
+
+.panel{
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px;
+}
+.panel + .panel{ margin-top: 22px; }
+
+.panel h2{
+  font-family: 'Shippori Mincho', serif;
+  font-size: 17px;
+  margin: 0 0 16px;
+  color: var(--ink);
+  display:flex;
+  align-items:center;
+  gap: 8px;
+}
+.panel h2::before{
+  content:"";
+  width: 4px;
+  height: 16px;
+  background: var(--gold);
+  display:inline-block;
+  border-radius: 2px;
+}
+
+.field{ margin-bottom: 16px; }
+.field:last-child{ margin-bottom: 0; }
+.field label{
+  display:block;
+  font-size: 12.5px;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+}
+select, input[type=number]{
+  width: 100%;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 9px 10px;
+  border-radius: 6px;
+  font-size: 14.5px;
+  font-family: inherit;
+}
+select:focus, input:focus{ outline: 2px solid var(--gold-soft); outline-offset: 1px; }
+
+.plus-row{ display:flex; align-items:center; gap: 10px; }
+.plus-row input[type=range]{ flex: 1; accent-color: var(--gold); }
+.plus-row .plus-input{
+  width: 84px;
+  flex: none;
+  font-family: var(--mono);
+  font-size: 13.5px;
+  text-align:right;
+  color: var(--gold);
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 8px;
+}
+
+.score-hero{
+  display:flex;
+  align-items:baseline;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.score-hero .num{
+  font-family: var(--mono);
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1;
+}
+.score-hero .max{
+  font-size: 16px;
+  color: var(--ink-dim);
+}
+.score-hero .startlv{
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--ink-dim);
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--line);
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+
+table{
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+th, td{
+  padding: 8px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+th{
+  color: var(--ink-dim);
+  font-weight: 500;
+  font-size: 12px;
+}
+td.num, th.num{ font-family: var(--mono); text-align: right; }
+.badge{
+  display:inline-block;
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+.badge.ok{ background: var(--ok-bg); color: var(--ok); }
+.badge.ng{ background: var(--ng-bg); color: var(--ng); }
+
+.stat-grid{
+  display:grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.stat-box{
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 6px;
+  text-align:center;
+}
+.stat-box .label{ font-size: 11px; color: var(--ink-dim); }
+.stat-box .val{ font-family: var(--mono); font-size: 17px; color: var(--ink); margin-top: 2px; }
+
+.overflow-x{ overflow-x: auto; }
+
+.opt-controls{
+  display:flex;
+  gap: 12px;
+  align-items:center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+button.run{
+  background: var(--gold);
+  color: #1a1608;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: -apple-system, sans-serif;
+}
+button.run:hover{ background: var(--gold-soft); }
+.opt-note{ font-size: 12.5px; color: var(--ink-dim); }
+
+.opt-list{ display:flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y:auto; }
+.opt-row{
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+}
+.opt-row .rank{ font-family: var(--mono); color: var(--ink-dim); width: 26px; }
+.opt-row .items{ flex:1; }
+.opt-row .score{ font-family: var(--mono); font-weight:700; color: var(--gold); font-size: 16px; }
+.empty-note{ color: var(--ink-dim); font-size: 13.5px; padding: 20px 0; text-align:center; }
+
+.cond-cell .lv-note{ display:block; font-size: 11px; color: var(--ink-dim); }
+
+.reso-row{
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.reso-row .reso-name{ color: var(--gold); font-weight: 700; margin-right: 6px; }
+.reso-row .reso-tag{
+  display:inline-block;
+  font-size: 10.5px;
+  color: var(--ok);
+  background: var(--ok-bg);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-left: 6px;
+}
+.reso-row .reso-effect{ display:block; color: var(--ink-dim); margin-top: 3px; }
+.reso-empty{ color: var(--ink-dim); font-size: 13px; }
+
+.level-table-wrap{ max-height: 480px; overflow-y: auto; }
+#levelTable thead th{
+  position: sticky;
+  top: 0;
+  background: var(--bg-panel);
+}
+#levelTable td.startlv-row, #levelTable tr.startlv-row td{ background: var(--ok-bg); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>勇者育成台帳<small>装備ステータス&nbsp;採点シミュレーター</small></h1>
+    <button class="theme-toggle" id="themeToggle" type="button">表示切替</button>
+  </header>
+
+  <div class="grid">
+    <div>
+      <div class="panel">
+        <h2>装備選択</h2>
+        <div class="field">
+          <label for="weaponSel">武器1</label>
+          <select id="weaponSel"></select>
+        </div>
+        <div class="field">
+          <label for="weaponSel2">武器2(合成・任意)</label>
+          <select id="weaponSel2"></select>
+        </div>
+        <div class="field">
+          <label for="weaponPlus">武器強化値 <span id="weaponPlusMaxLabel"></span></label>
+          <div class="plus-row">
+            <input type="range" id="weaponPlus" min="0" max="0" value="0" step="1">
+            <input type="number" class="plus-input" id="weaponPlusInput" min="0" max="0" value="0" step="1">
+          </div>
+        </div>
+        <div class="field">
+          <label for="armorSel">防具1</label>
+          <select id="armorSel"></select>
+        </div>
+        <div class="field">
+          <label for="armorSel2">防具2(合成・任意)</label>
+          <select id="armorSel2"></select>
+        </div>
+        <div class="field">
+          <label for="armorPlus">防具強化値 <span id="armorPlusMaxLabel"></span></label>
+          <div class="plus-row">
+            <input type="range" id="armorPlus" min="0" max="0" value="0" step="1">
+            <input type="number" class="plus-input" id="armorPlusInput" min="0" max="0" value="0" step="1">
+          </div>
+        </div>
+        <div class="field">
+          <label for="item1Sel">アイテム1</label>
+          <select id="item1Sel"></select>
+        </div>
+        <div class="field">
+          <label for="item2Sel">アイテム2</label>
+          <select id="item2Sel"></select>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2 style="margin-top:0;">基礎値サマリー(Lv1)</h2>
+        <p class="opt-note" id="equipSummary" style="margin-top:-6px;"></p>
+        <div class="stat-grid" id="baseStatGrid"></div>
+        <h2 style="margin-top:4px;">レベル成長補正(1レベルあたり)</h2>
+        <div class="stat-grid" id="growthStatGrid"></div>
+        <h2 style="margin-top:16px;">共鳴</h2>
+        <div id="resonanceList"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>採点結果</h2>
+        <div class="score-hero">
+          <span class="num" id="scoreNum">0</span>
+          <span class="max">/ 99点</span>
+          <span class="startlv" id="startLvNote"></span>
+        </div>
+        <div class="overflow-x">
+          <table id="criteriaTable">
+            <thead>
+              <tr><th>基準</th><th>条件</th><th class="num">得点</th><th>判定</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>レベル別ステータス一覧(Lv1〜50)</h2>
+        <p class="opt-note">検証用に、四捨五入する前の生の値を小数第一位まで表示しています。採点判定は四捨五入した整数値で行われます。</p>
+        <div class="overflow-x level-table-wrap">
+          <table id="levelTable">
+            <thead>
+              <tr><th>Lv</th><th class="num">HP</th><th class="num">攻撃</th><th class="num">防御</th><th class="num">回避</th><th class="num">運</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>アイテム最適化検索</h2>
+        <p class="opt-note">現在選択中の武器・防具・プラス値を固定し、アイテム1&times;2の全組み合わせ(重複可)の中から合計50点を超えるものを探して得点順に表示します。</p>
+        <div class="opt-controls">
+          <button class="run" id="runOptBtn" type="button">最適アイテムを検索</button>
+          <span class="opt-note" id="optStatus"></span>
+        </div>
+        <div class="opt-list" id="optList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"baseStats": {"HP": 30, "ATK": 5, "DEF": 5, "EVA": 5, "LUK": 5}, "baseGrowth": {"HP": 5.5, "ATK": 2.5, "DEF": 2.5, "EVA": 2.3, "LUK": 1.1}, "weapons": [{"name": "ショートソード", "initAtk": 5, "plusMax": 200, "baseMods": {}, "growthMods": {}}, {"name": "ロングソード", "initAtk": 9, "plusMax": 45, "baseMods": {}, "growthMods": {}}, {"name": "ブロンズソード", "initAtk": 15, "plusMax": 45, "baseMods": {}, "growthMods": {}}, {"name": "ナイトソード", "initAtk": 19, "plusMax": 45, "baseMods": {}, "growthMods": {"ATK": 1}}, {"name": "ヘビーソード", "initAtk": 25, "plusMax": 80, "baseMods": {"EVA": -3}, "growthMods": {"ATK": 3, "EVA": -1}}, {"name": "盗賊のナイフ", "initAtk": 15, "plusMax": 30, "baseMods": {"LUK": 20}, "growthMods": {}}, {"name": "バスターソード", "initAtk": 25, "plusMax": 45, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 2, "DEF": 1}}, {"name": "ミスリルソード", "initAtk": 29, "plusMax": 60, "baseMods": {}, "growthMods": {"ATK": 3}}, {"name": "幸運の剣", "initAtk": 30, "plusMax": 30, "baseMods": {"LUK": 25}, "growthMods": {"LUK": 1}}, {"name": "ドラゴンソード", "initAtk": 35, "plusMax": 45, "baseMods": {"DEF": 5}, "growthMods": {"ATK": 2, "DEF": 1}}, {"name": "ディフェンダー", "initAtk": 35, "plusMax": 30, "baseMods": {"DEF": 20}, "growthMods": {"ATK": 2, "DEF": 2, "EVA": 1}}, {"name": "正宗", "initAtk": 35, "plusMax": 500, "baseMods": {}, "growthMods": {"ATK": 4}}, {"name": "プラチナソード", "initAtk": 39, "plusMax": 45, "baseMods": {}, "growthMods": {"ATK": 3, "DEF": 1, "EVA": 1}}, {"name": "ブラッドソード", "initAtk": 40, "plusMax": 45, "baseMods": {"HP": -5}, "growthMods": {"HP": -1, "ATK": 4, "LUK": -1}}, {"name": "妖刀黒雫", "initAtk": 45, "plusMax": 300, "baseMods": {"HP": -10}, "growthMods": {"HP": -1, "ATK": 5, "LUK": -1}}, {"name": "エンハンスソード", "initAtk": 50, "plusMax": 90, "baseMods": {}, "growthMods": {"ATK": 4}}, {"name": "ルーンブレイド", "initAtk": 55, "plusMax": 45, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 5, "DEF": 1, "EVA": 5}}, {"name": "クレイモア", "initAtk": 70, "plusMax": 60, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 6, "DEF": 1}}, {"name": "レイピア", "initAtk": 75, "plusMax": 60, "baseMods": {"HP": 20}, "growthMods": {"HP": 3, "ATK": 4, "DEF": 1}}, {"name": "ダンスソード", "initAtk": 40, "plusMax": 30, "baseMods": {"EVA": 1000}, "growthMods": {"HP": 1, "ATK": 4, "DEF": 1, "EVA": 15}}, {"name": "水龍の剣", "initAtk": 60, "plusMax": 75, "baseMods": {"HP": 20, "DEF": 10}, "growthMods": {"HP": 5, "ATK": 5, "DEF": 1}}, {"name": "ダークブレイド", "initAtk": 65, "plusMax": 90, "baseMods": {"HP": -10, "DEF": -3, "EVA": -3}, "growthMods": {"HP": -2, "ATK": 6, "DEF": -1, "LUK": -2}}, {"name": "アークブレイド", "initAtk": 70, "plusMax": 75, "baseMods": {"HP": 10, "DEF": 15}, "growthMods": {"HP": 2, "ATK": 5, "DEF": 2, "EVA": 3}}, {"name": "竜神の剣", "initAtk": 75, "plusMax": 75, "baseMods": {"HP": 10, "DEF": 35}, "growthMods": {"HP": 2, "ATK": 4, "DEF": 3, "EVA": 3}}, {"name": "光輝の剣", "initAtk": 65, "plusMax": 15, "baseMods": {"DEF": 50}, "growthMods": {"ATK": 6, "DEF": 4, "EVA": 5}}, {"name": "漆黒の剣", "initAtk": 90, "plusMax": 15, "baseMods": {"HP": -20}, "growthMods": {"HP": -4, "ATK": 9}}, {"name": "くない", "initAtk": 20, "plusMax": 100, "baseMods": {"EVA": 50}, "growthMods": {"ATK": 3, "EVA": 10}}, {"name": "鉄のナイフ", "initAtk": 3, "plusMax": 15, "baseMods": {}, "growthMods": {"LUK": 1}}, {"name": "銀のナイフ", "initAtk": 2, "plusMax": 15, "baseMods": {"LUK": 20}, "growthMods": {"LUK": 1}}, {"name": "金のナイフ", "initAtk": 1, "plusMax": 30, "baseMods": {"LUK": 20}, "growthMods": {"LUK": 1}}, {"name": "ダイヤのナイフ", "initAtk": 20, "plusMax": 60, "baseMods": {"LUK": 40}, "growthMods": {"LUK": 2}}, {"name": "鉄の剣", "initAtk": 5, "plusMax": 15, "baseMods": {}, "growthMods": {"LUK": 1}}, {"name": "銀の剣", "initAtk": 4, "plusMax": 15, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}}, {"name": "金の剣", "initAtk": 3, "plusMax": 30, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}}, {"name": "ダイヤの剣", "initAtk": 30, "plusMax": 90, "baseMods": {"LUK": 40}, "growthMods": {"LUK": 2}}, {"name": "鉄の斧", "initAtk": 30, "plusMax": 60, "baseMods": {}, "growthMods": {"ATK": 6, "LUK": 1}}, {"name": "銀の斧", "initAtk": 4, "plusMax": 15, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}}, {"name": "金の斧", "initAtk": 3, "plusMax": 30, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}}, {"name": "オニの金棒", "initAtk": 15, "plusMax": 15, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}}, {"name": "チョコバー", "initAtk": 15, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "桜橘の刀", "initAtk": 15, "plusMax": 90, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}}, {"name": "流星の剣", "initAtk": 15, "plusMax": 15, "baseMods": {"EVA": 2500}, "growthMods": {"ATK": 1, "EVA": 10}}, {"name": "粋夏の刀", "initAtk": 15, "plusMax": 90, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}}, {"name": "キャンディケイン", "initAtk": 5, "plusMax": 5, "baseMods": {}, "growthMods": {}}, {"name": "粽大刀", "initAtk": 5, "plusMax": 55, "baseMods": {"HP": 5, "DEF": 5, "LUK": 5, "EVA": 55}, "growthMods": {"EVA": 5, "LUK": 5}}, {"name": "アニバーサリーソード", "initAtk": 15, "plusMax": 200, "baseMods": {}, "growthMods": {}}, {"name": "竹刀", "initAtk": 5, "plusMax": 5, "baseMods": {}, "growthMods": {}}, {"name": "セラミックソード", "initAtk": 150, "plusMax": 5, "baseMods": {}, "growthMods": {}}, {"name": "サバイバルナイフ", "initAtk": 30, "plusMax": 30, "baseMods": {}, "growthMods": {}}], "armors": [{"name": "冒険者の服", "initDef": 5, "plusMax": 200, "baseMods": {}, "growthMods": {}}, {"name": "冒険者の鎧", "initDef": 9, "plusMax": 45, "baseMods": {}, "growthMods": {}}, {"name": "青銅の鎧", "initDef": 15, "plusMax": 45, "baseMods": {}, "growthMods": {}}, {"name": "ナイトメイル", "initDef": 19, "plusMax": 45, "baseMods": {}, "growthMods": {"DEF": 1}}, {"name": "ヘビーメイル", "initDef": 25, "plusMax": 90, "baseMods": {"EVA": -3}, "growthMods": {"DEF": 2, "EVA": -1}}, {"name": "バスターメイル", "initDef": 25, "plusMax": 45, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 1, "DEF": 2}}, {"name": "ミスリルメイル", "initDef": 29, "plusMax": 60, "baseMods": {}, "growthMods": {"DEF": 3}}, {"name": "ドラゴンアーマー", "initDef": 30, "plusMax": 45, "baseMods": {"ATK": 5}, "growthMods": {"HP": 3, "ATK": 1, "DEF": 2}}, {"name": "グロウメイル", "initDef": 25, "plusMax": 60, "baseMods": {}, "growthMods": {"HP": 3, "ATK": 2, "DEF": 2, "EVA": 1, "LUK": 1}}, {"name": "幸運の鎧", "initDef": 30, "plusMax": 30, "baseMods": {"LUK": 25}, "growthMods": {"LUK": 1}}, {"name": "生命の鎧", "initDef": 35, "plusMax": 45, "baseMods": {"HP": 50}, "growthMods": {"HP": 5, "DEF": 3}}, {"name": "プラチナメイル", "initDef": 39, "plusMax": 45, "baseMods": {}, "growthMods": {"ATK": 1, "DEF": 4, "EVA": 3}}, {"name": "ブラッドメイル", "initDef": 35, "plusMax": 45, "baseMods": {"HP": 20, "LUK": -10}, "growthMods": {"HP": 1, "DEF": 6, "LUK": -2}}, {"name": "オフェンサー", "initDef": 35, "plusMax": 30, "baseMods": {"ATK": 20}, "growthMods": {"ATK": 2, "DEF": 2, "EVA": 1}}, {"name": "エンハンスメイル", "initDef": 50, "plusMax": 90, "baseMods": {}, "growthMods": {"DEF": 6}}, {"name": "ルーンメイル", "initDef": 55, "plusMax": 45, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 1, "DEF": 7, "EVA": 5}}, {"name": "ハイランドメイル", "initDef": 70, "plusMax": 60, "baseMods": {"HP": 30}, "growthMods": {"HP": 1, "DEF": 8, "EVA": 6}}, {"name": "チェインメイル", "initDef": 75, "plusMax": 60, "baseMods": {"HP": 20}, "growthMods": {"HP": 3, "ATK": 1, "DEF": 6}}, {"name": "身かわしの鎧", "initDef": 35, "plusMax": 30, "baseMods": {"EVA": 1000}, "growthMods": {"DEF": 4, "EVA": 15}}, {"name": "龍鱗の鎧", "initDef": 60, "plusMax": 75, "baseMods": {"HP": 20}, "growthMods": {"HP": 5, "DEF": 7}}, {"name": "ダークメイル", "initDef": 65, "plusMax": 90, "baseMods": {"HP": -10, "ATK": -3, "EVA": -3}, "growthMods": {"HP": -2, "ATK": -1, "DEF": 8, "LUK": -3}}, {"name": "アークメイル", "initDef": 70, "plusMax": 75, "baseMods": {"HP": 10, "ATK": 15, "EVA": 10}, "growthMods": {"HP": 2, "ATK": 2, "DEF": 5, "EVA": 3}}, {"name": "太陽の鎧", "initDef": 65, "plusMax": 15, "baseMods": {"EVA": 10}, "growthMods": {"ATK": 3, "DEF": 6, "EVA": 5}}, {"name": "甲冑", "initDef": 60, "plusMax": 150, "baseMods": {}, "growthMods": {"DEF": 7}}, {"name": "漆黒の鎧", "initDef": 90, "plusMax": 15, "baseMods": {"HP": -20}, "growthMods": {"HP": -4, "DEF": 9}}, {"name": "忍装束", "initDef": 15, "plusMax": 100, "baseMods": {"EVA": 50}, "growthMods": {"DEF": 3, "EVA": 10}}, {"name": "黒霧の衣", "initDef": 45, "plusMax": 300, "baseMods": {"HP": -10}, "growthMods": {"HP": -1, "DEF": 5, "LUK": -1}}, {"name": "正宗紋の鎧", "initDef": 35, "plusMax": 500, "baseMods": {}, "growthMods": {"DEF": 4}}, {"name": "鉄の鎧", "initDef": 30, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "銀の鎧", "initDef": 8, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "金の鎧", "initDef": 6, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "ダイヤの鎧", "initDef": 90, "plusMax": 15, "baseMods": {}, "growthMods": {"DEF": 5, "LUK": 3}}, {"name": "オニのパンツ", "initDef": 15, "plusMax": 15, "baseMods": {}, "growthMods": {"HP": 1, "DEF": 1}}, {"name": "菱餅大鎧", "initDef": 30, "plusMax": 15, "baseMods": {}, "growthMods": {"EVA": -1}}, {"name": "クッキーメイル", "initDef": 5, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "端午の鎧", "initDef": 5, "plusMax": 55, "baseMods": {"HP": 5, "ATK": 5, "EVA": 5, "LUK": 5}, "growthMods": {"EVA": 5, "LUK": 5}}, {"name": "キッズマント", "initDef": 10, "plusMax": 15, "baseMods": {"EVA": 50}, "growthMods": {}}, {"name": "ターキーメイル", "initDef": 10, "plusMax": 15, "baseMods": {}, "growthMods": {"HP": 2, "EVA": 2}}, {"name": "アニバーサリーメイル", "initDef": 15, "plusMax": 200, "baseMods": {}, "growthMods": {}}, {"name": "セラミックメイル", "initDef": 150, "plusMax": 5, "baseMods": {}, "growthMods": {}}], "items": [{"name": "生命の木の葉", "initMods": {"HP": 10}, "growthMods": {}, "special": null}, {"name": "豪腕の木の葉", "initMods": {"ATK": 5}, "growthMods": {}, "special": null}, {"name": "守りの木の葉", "initMods": {"DEF": 5}, "growthMods": {}, "special": null}, {"name": "回避の木の葉", "initMods": {"EVA": 50}, "growthMods": {}, "special": null}, {"name": "運気の木の葉", "initMods": {"LUK": 3}, "growthMods": {}, "special": null}, {"name": "経験の木の葉", "initMods": {"LUK": 3, "EXP": 50}, "growthMods": {}, "special": null}, {"name": "生命の木の大葉", "initMods": {"HP": 100}, "growthMods": {}, "special": null}, {"name": "豪腕の木の大葉", "initMods": {"ATK": 50}, "growthMods": {}, "special": null}, {"name": "守りの木の大葉", "initMods": {"DEF": 30}, "growthMods": {}, "special": null}, {"name": "回避の木の大葉", "initMods": {"EVA": 200}, "growthMods": {}, "special": null}, {"name": "運気の木の大葉", "initMods": {"LUK": 30}, "growthMods": {}, "special": null}, {"name": "体力の木の大葉", "initMods": {"ATK": 50, "DEF": 15}, "growthMods": {}, "special": null}, {"name": "守護の木の大葉", "initMods": {"DEF": 15, "EVA": 50}, "growthMods": {}, "special": null}, {"name": "経験の木の大葉", "initMods": {"LUK": 3, "EXP": 100}, "growthMods": {}, "special": null}, {"name": "生命の木の実", "initMods": {}, "growthMods": {"HP": 5}, "special": null}, {"name": "豪腕の木の実", "initMods": {}, "growthMods": {"ATK": 2}, "special": null}, {"name": "守りの木の実", "initMods": {}, "growthMods": {"DEF": 2}, "special": null}, {"name": "回避の木の実", "initMods": {}, "growthMods": {"EVA": 5}, "special": null}, {"name": "運気の木の実", "initMods": {}, "growthMods": {"LUK": 1}, "special": null}, {"name": "体力の木の実", "initMods": {}, "growthMods": {"ATK": 2, "DEF": 1}, "special": null}, {"name": "守護の木の実", "initMods": {}, "growthMods": {"DEF": 1, "EVA": 2}, "special": null}, {"name": "生命の木の熟実", "initMods": {}, "growthMods": {"HP": 8}, "special": null}, {"name": "豪腕の木の熟実", "initMods": {}, "growthMods": {"ATK": 4}, "special": null}, {"name": "守りの木の熟実", "initMods": {}, "growthMods": {"DEF": 4}, "special": null}, {"name": "回避の木の熟実", "initMods": {}, "growthMods": {"EVA": 10}, "special": null}, {"name": "運気の木の熟実", "initMods": {}, "growthMods": {"LUK": 2}, "special": null}, {"name": "スタミナドリンク", "initMods": {"HP": 80}, "growthMods": {"HP": 5}, "special": null}, {"name": "ニンニク", "initMods": {"ATK": 15, "DEF": 10}, "growthMods": {"ATK": 2, "DEF": 1}, "special": null}, {"name": "力餅", "initMods": {}, "growthMods": {}, "special": "doubleWeaponInit"}, {"name": "桜餅", "initMods": {}, "growthMods": {"HP": 2, "ATK": 1, "DEF": 1, "EVA": 1, "LUK": 1}, "special": null}], "criteria": [{"id": "H1", "score": 5, "conditions": [{"level": 1, "stat": "HP", "threshold": 70}]}, {"id": "H2", "score": 7, "conditions": [{"level": 14, "stat": "HP", "threshold": 195}]}, {"id": "H3", "score": 7, "conditions": [{"level": 14, "stat": "HP", "threshold": 245}]}, {"id": "H4", "score": 5, "conditions": [{"level": 14, "stat": "HP", "threshold": 295}]}, {"id": "H5", "score": 2, "conditions": [{"level": 14, "stat": "HP", "threshold": 345}]}, {"id": "A1", "score": 5, "conditions": [{"level": 8, "stat": "ATK", "threshold": 102}, {"level": 12, "stat": "ATK", "threshold": 120}]}, {"id": "A2", "score": 10, "conditions": [{"level": 8, "stat": "ATK", "threshold": 123}, {"level": 12, "stat": "ATK", "threshold": 147}]}, {"id": "A3", "score": 5, "conditions": [{"level": 8, "stat": "ATK", "threshold": 138}, {"level": 12, "stat": "ATK", "threshold": 163}]}, {"id": "A4", "score": 10, "conditions": [{"level": 8, "stat": "ATK", "threshold": 165}, {"level": 12, "stat": "ATK", "threshold": 192}]}, {"id": "A5", "score": 7, "conditions": [{"level": 8, "stat": "ATK", "threshold": 196}, {"level": 12, "stat": "ATK", "threshold": 229}]}, {"id": "D1", "score": 10, "conditions": [{"level": 10, "stat": "DEF", "threshold": 219}]}, {"id": "D2", "score": 10, "conditions": [{"level": 14, "stat": "DEF", "threshold": 272}]}, {"id": "D3", "score": 7, "conditions": [{"level": 8, "stat": "DEF", "threshold": 219}]}, {"id": "D4", "score": 7, "conditions": [{"level": 12, "stat": "DEF", "threshold": 272}]}, {"id": "D5", "score": 2, "conditions": [{"level": 14, "stat": "DEF", "threshold": 321}]}]};
+
+DATA.items.unshift({ name: 'なし(装備しない)', initMods: {}, growthMods: {}, special: null });
+DATA.resonances = [{"weapon": "ナイトソード", "armor": "ナイトメイル", "name": "完全防御", "effect": "敵が攻撃をしたとき、ランダムでその攻撃を無効化する。確率1/2程度で発動。"}, {"weapon": "ヘビーソード", "armor": "ヘビーメイル", "name": "クリティカルアップ", "effect": "クリティカル攻撃率2倍"}, {"weapon": "バスターソード", "armor": "バスターメイル", "name": "生命アップ", "effect": "HP+30", "statEffect": {"type": "hp", "value": 30}}, {"weapon": "ミスリルソード", "armor": "ミスリルメイル", "name": "泉探し", "effect": "全ての泉の効果1.5倍"}, {"weapon": "幸運の剣", "armor": "幸運の鎧", "name": "宝探し", "effect": "通常宝箱の発見率が2倍となる。"}, {"weapon": "ドラゴンソード", "armor": "バスターメイル", "name": "ドラゴンバスター", "effect": "ドラゴンへの与ダメージ1.5倍"}, {"weapon": "ドラゴンソード", "armor": "ドラゴンアーマー", "name": "ドラゴン耐性", "effect": "ドラゴンからの被ダメ半減"}, {"weapon": "ディフェンダー", "armor": "オフェンサー", "name": "ステータスアップ", "effect": "武具の攻防が1.3倍になる。", "statEffect": {"type": "status_multiplier", "value": 1.3}}, {"weapon": "正宗", "armor": "正宗紋の鎧", "name": "白刃取り", "effect": "敵の一撃目の攻撃を完全に無効化する。"}, {"weapon": "プラチナソード", "armor": "プラチナメイル", "name": "ランダムアップ", "effect": "戦闘開始時に攻撃か防御のどちらかが20%上昇する。攻防比1:1。戦闘終了時に元へ戻る。確率1/2程度で発動。"}, {"weapon": "ブラッドソード", "armor": "ブラッドメイル", "name": "ドレイン", "effect": "攻撃時にライフを吸収する。確率1/5程度で発動。回復量は与ダメの10%。"}, {"weapon": "妖刀黒雫", "armor": "ダークメイル", "name": "一撃死", "effect": "ランダムで敵を即死させる。確率1/4程度で発動。"}, {"weapon": "妖刀黒雫", "armor": "黒霧の衣", "name": "居合い斬り", "effect": "1ターン目の勇者の攻撃が全てクリティカルになる。"}, {"weapon": "エンハンスソード", "armor": "エンハンスメイル", "name": "ピンチにクリティカル", "effect": "瀕死時にクリティカル攻撃率UP"}, {"weapon": "ルーンブレイド", "armor": "ルーンメイル", "name": "光探し", "effect": "聖なる光の効果が2倍"}, {"weapon": "クレイモア", "armor": "ハイランドメイル", "name": "毒耐性", "effect": "竜神の古都にて、青い毒草(防御成長率低下)を必ず無効化する。"}, {"weapon": "レイピア", "armor": "チェインメイル", "name": "防御力ダメージ", "effect": "敵に攻撃があたった場合、敵の防御力をさげる。"}, {"weapon": "ダンスソード", "armor": "身かわしの鎧", "name": "先制攻撃", "effect": "先制攻撃率UP"}, {"weapon": "ダンスソード", "armor": "身かわしの鎧", "name": "逃亡阻止", "effect": "敵が逃げにくくなる。"}, {"weapon": "水龍の剣", "armor": "バスターメイル", "name": "水龍バスター", "effect": "水龍への与ダメージ1.5倍"}, {"weapon": "水龍の剣", "armor": "龍鱗の鎧", "name": "水龍ドロップアップ", "effect": "水龍ドロップ率UP"}, {"weapon": "ダークブレイド", "armor": "ダークメイル", "name": "負ステータス耐性", "effect": "装備・アイテムが持つ負の基本値補正・負の成長値補正を打ち消して0にする。"}, {"weapon": "アークブレイド", "armor": "バスターメイル", "name": "アークドラゴンバスター", "effect": "アークドラゴンへの与ダメージ1.5倍"}, {"weapon": "アークブレイド", "armor": "アークメイル", "name": "アークドラゴンドロップアップ", "effect": "アークドラゴンのドロップ率UP"}, {"weapon": "竜神の剣", "armor": "バスターメイル", "name": "竜神バスター", "effect": "竜神の怨念への与ダメージ1.5倍"}, {"weapon": "竜神の剣", "armor": "龍鱗の鎧", "name": "龍神ドロップアップ", "effect": "竜神の怨念のドロップ率UP"}, {"weapon": "光輝の剣", "armor": "太陽の鎧", "name": "瀕死時に回復", "effect": "瀕死時一度だけ全回復、HP20%以下で発動する。"}, {"weapon": "漆黒の剣", "armor": "漆黒の鎧", "name": "闇の空", "effect": "特定敵の出現時間制限を解除。"}, {"weapon": "くない", "armor": "忍装束", "name": "3連続攻撃", "effect": "通常攻撃に加え、敵の行動前に2回追加攻撃する。攻撃1回あたりの与ダメは本来の1/3程になる。"}, {"weapon": "鉄のナイフ", "armor": "鉄の鎧", "name": "連続攻撃(微)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の50%程になる。"}, {"weapon": "銀のナイフ", "armor": "銀の鎧", "name": "連続攻撃(弱)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の55%程になる。"}, {"weapon": "金のナイフ", "armor": "金の鎧", "name": "連続攻撃(中)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の60%程になる。"}, {"weapon": "ダイヤのナイフ", "armor": "ダイヤの鎧", "name": "連続攻撃(強)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の65%程になる。"}, {"weapon": "鉄の剣", "armor": "甲冑", "name": "城守", "effect": "漆黒の古城で受けるダメージを25%減少する。"}, {"weapon": "鉄の剣", "armor": "鉄の鎧", "name": "運アップ(微)", "effect": "運の初期補正が10UP", "statEffect": {"type": "luk", "value": 10}}, {"weapon": "銀の剣", "armor": "銀の鎧", "name": "運アップ(弱)", "effect": "運の初期補正が20UP", "statEffect": {"type": "luk", "value": 20}}, {"weapon": "金の剣", "armor": "金の鎧", "name": "運アップ(中)", "effect": "運の初期補正が30UP", "statEffect": {"type": "luk", "value": 30}}, {"weapon": "ダイヤの剣", "armor": "ダイヤの鎧", "name": "運アップ(強)", "effect": "運の初期補正が40UP", "statEffect": {"type": "luk", "value": 40}}, {"weapon": "鉄の斧", "armor": "鉄の鎧", "name": "金貨泥棒(弱)", "effect": "攻撃時、金貨を入手。確率1%程度で発動。金貨とは別に強化鉱20を入手することもある。"}, {"weapon": "銀の斧", "armor": "銀の鎧", "name": "金貨泥棒(中)", "effect": "攻撃時、金貨を入手。確率2%程度で発動。"}, {"weapon": "金の斧", "armor": "金の鎧", "name": "金貨泥棒(強)", "effect": "攻撃時、金貨を入手。確率3%程度で発動。"}, {"weapon": "チョコバー", "armor": "クッキーメイル", "name": "敵寄せ(強)", "effect": "敵とのエンカウント率がUP。敵寄せ(弱)+敵寄せ(強)で1.3倍程度になる。"}, {"weapon": "桜橘の刀", "armor": "菱餅大鎧", "name": "硬化", "effect": "敵の攻撃をくらうと防御力が上がるが、ターン経過ごとに攻撃力が下がる。戦闘終了時に元に戻る。"}, {"weapon": "粋夏の刀", "armor": "太陽の鎧", "name": "目くらまし", "effect": "敵が攻撃をしたとき、ランダムでその攻撃を無効化する。確率1/3程度で発動。"}, {"weapon": "粽大刀", "armor": "端午の鎧", "name": "端午", "effect": "現在HPの下一桁が5になった場合、攻撃力または防御力が5上昇する。攻防比1:1。"}, {"weapon": "アニバーサリーソード", "armor": "アニバーサリーメイル", "name": "超記念効果", "effect": "記念効果の効果が前後1分まで拡大する。"}, {"weapon": "セラミックソード", "armor": "セラミックメイル", "name": "基本値アップ", "effect": "攻撃と防御の出発時補正値+30", "statEffect": {"type": "atkdef_init", "value": 30}}];
+
+
+const STAT_LABEL = {HP:'HP', ATK:'攻撃', DEF:'防御', EVA:'回避', LUK:'運'};
+const STATS = ['HP','ATK','DEF','EVA','LUK'];
+
+function sumMods(){
+  // accumulate mods from arguments (objects of stat->num)
+  const out = {};
+  for (const obj of arguments){
+    if (!obj) continue;
+    for (const k in obj){ out[k] = (out[k]||0) + obj[k]; }
+  }
+  return out;
+}
+
+function calcExpStartLevel(expBonus){
+  if (expBonus <= 0) return 1;
+  let level = 1;
+  let cumulative = 0;
+  while (true){
+    const need = level*level*10; // exp to go from `level` to `level+1`
+    if (cumulative + need > expBonus) break;
+    cumulative += need;
+    level += 1;
+    if (level > 999) break;
+  }
+  return level;
+}
+
+function mergeDictMax(a, b){
+  const out = {};
+  const keys = new Set([...Object.keys(a||{}), ...Object.keys(b||{})]);
+  keys.forEach(k => { out[k] = Math.max((a&&a[k])||0, (b&&b[k])||0); });
+  return out;
+}
+
+function getMergedWeapon(){
+  const idx1 = +els.weaponSel.value;
+  const idx2 = +els.weaponSel2.value;
+  const w1 = DATA.weapons[idx1];
+  if (idx2 < 0 || idx2 === idx1){
+    return { name: w1.name, initAtk: w1.initAtk, plusMax: w1.plusMax, baseMods: w1.baseMods, growthMods: w1.growthMods };
+  }
+  const w2 = DATA.weapons[idx2];
+  return {
+    name: `${w1.name} + ${w2.name}(合成)`,
+    initAtk: Math.max(w1.initAtk, w2.initAtk),
+    plusMax: Math.ceil((w1.plusMax + w2.plusMax) / 2),
+    baseMods: mergeDictMax(w1.baseMods, w2.baseMods),
+    growthMods: mergeDictMax(w1.growthMods, w2.growthMods),
+  };
+}
+
+function getMergedArmor(){
+  const idx1 = +els.armorSel.value;
+  const idx2 = +els.armorSel2.value;
+  const a1 = DATA.armors[idx1];
+  if (idx2 < 0 || idx2 === idx1){
+    return { name: a1.name, initDef: a1.initDef, plusMax: a1.plusMax, baseMods: a1.baseMods, growthMods: a1.growthMods };
+  }
+  const a2 = DATA.armors[idx2];
+  return {
+    name: `${a1.name} + ${a2.name}(合成)`,
+    initDef: Math.max(a1.initDef, a2.initDef),
+    plusMax: Math.ceil((a1.plusMax + a2.plusMax) / 2),
+    baseMods: mergeDictMax(a1.baseMods, a2.baseMods),
+    growthMods: mergeDictMax(a1.growthMods, a2.growthMods),
+  };
+}
+
+function summarizeResonanceStatEffects(resonances){
+  const s = { atkDefInitBonus: 0, statusMultiplier: 1, hpBonus: 0, lukBonus: 0 };
+  resonances.forEach(r => {
+    const eff = r.statEffect;
+    if (!eff) return;
+    if (eff.type === 'hp') s.hpBonus += eff.value;
+    else if (eff.type === 'luk') s.lukBonus += eff.value;
+    else if (eff.type === 'atkdef_init') s.atkDefInitBonus += eff.value;
+    else if (eff.type === 'status_multiplier') s.statusMultiplier *= eff.value;
+  });
+  return s;
+}
+
+function calcFromEquip(weapon, weaponPlus, armor, armorPlus, item1, item2, resoMods){
+  resoMods = resoMods || { atkDefInitBonus: 0, statusMultiplier: 1, hpBonus: 0, lukBonus: 0 };
+  const hasMochi = [item1, item2].some(it => it.special === 'doubleWeaponInit');
+  const weaponInitAtk = weapon.initAtk * (hasMochi ? 2 : 1) + weaponPlus;
+  const armorInitDef = armor.initDef + armorPlus;
+
+  const itemInit = sumMods(item1.initMods, item2.initMods);
+  const itemGrowth = sumMods(item1.growthMods, item2.growthMods);
+
+  // 「武具の攻防」= 武器の初期値+強化値 と、防具の基本値によるATK加算 をまとめてステータスアップ倍率の対象とし、
+  // 基本値アップ(+30)は倍率適用後に加算する。防具側も対称に扱う。アイテム由来の加算は倍率の対象外。
+  const atkBundle = (weaponInitAtk + (armor.baseMods.ATK||0)) * resoMods.statusMultiplier + resoMods.atkDefInitBonus;
+  const defBundle = (armorInitDef + (weapon.baseMods.DEF||0)) * resoMods.statusMultiplier + resoMods.atkDefInitBonus;
+
+  const base = {
+    HP: DATA.baseStats.HP + (weapon.baseMods.HP||0) + (armor.baseMods.HP||0) + (itemInit.HP||0) + resoMods.hpBonus,
+    ATK: DATA.baseStats.ATK + atkBundle + (itemInit.ATK||0),
+    DEF: DATA.baseStats.DEF + defBundle + (itemInit.DEF||0),
+    EVA: DATA.baseStats.EVA + (weapon.baseMods.EVA||0) + (armor.baseMods.EVA||0) + (itemInit.EVA||0),
+    LUK: DATA.baseStats.LUK + (weapon.baseMods.LUK||0) + (armor.baseMods.LUK||0) + (itemInit.LUK||0) + resoMods.lukBonus,
+  };
+  const growth = {
+    HP: DATA.baseGrowth.HP + (weapon.growthMods.HP||0) + (armor.growthMods.HP||0) + (itemGrowth.HP||0),
+    ATK: DATA.baseGrowth.ATK + (weapon.growthMods.ATK||0) + (armor.growthMods.ATK||0) + (itemGrowth.ATK||0),
+    DEF: DATA.baseGrowth.DEF + (weapon.growthMods.DEF||0) + (armor.growthMods.DEF||0) + (itemGrowth.DEF||0),
+    EVA: DATA.baseGrowth.EVA + (weapon.growthMods.EVA||0) + (armor.growthMods.EVA||0) + (itemGrowth.EVA||0),
+    LUK: DATA.baseGrowth.LUK + (weapon.growthMods.LUK||0) + (armor.growthMods.LUK||0) + (itemGrowth.LUK||0),
+  };
+  const expBonus = (itemInit.EXP||0);
+  const startLevel = calcExpStartLevel(expBonus);
+
+  return {base, growth, startLevel, expBonus};
+}
+
+function getSelectedWeaponIndices(){
+  const idxs = new Set([+els.weaponSel.value]);
+  const i2 = +els.weaponSel2.value;
+  if (i2 >= 0) idxs.add(i2);
+  return [...idxs];
+}
+function getSelectedArmorIndices(){
+  const idxs = new Set([+els.armorSel.value]);
+  const i2 = +els.armorSel2.value;
+  if (i2 >= 0) idxs.add(i2);
+  return [...idxs];
+}
+
+function getActiveResonances(){
+  const wIdxs = getSelectedWeaponIndices();
+  const aIdxs = getSelectedArmorIndices();
+  const matches = [];
+  wIdxs.forEach(wi => {
+    const wName = DATA.weapons[wi].name;
+    aIdxs.forEach(ai => {
+      const aName = DATA.armors[ai].name;
+      DATA.resonances.forEach(r => {
+        if (r.weapon === wName && r.armor === aName) matches.push(r);
+      });
+    });
+  });
+  return matches;
+}
+
+function buildState(){
+  const weapon = getMergedWeapon();
+  const armor = getMergedArmor();
+  const item1 = DATA.items[+els.item1Sel.value];
+  const item2 = DATA.items[+els.item2Sel.value];
+  const weaponPlus = +els.weaponPlus.value;
+  const armorPlus = +els.armorPlus.value;
+  const resonances = getActiveResonances();
+  const resoMods = summarizeResonanceStatEffects(resonances);
+  const state = calcFromEquip(weapon, weaponPlus, armor, armorPlus, item1, item2, resoMods);
+  state.weaponName = weapon.name;
+  state.armorName = armor.name;
+  state.resonances = resonances;
+  return state;
+}
+
+function rawStatAtLevel(state, stat, level){
+  return state.base[stat] + state.growth[stat] * (level - 1);
+}
+
+function statAtLevel(state, stat, level){
+  // 四捨五入(0.5は繰り上げ)して判定に使う
+  return Math.round(rawStatAtLevel(state, stat, level));
+}
+
+function evaluateCriteria(state){
+  let total = 0;
+  const rows = [];
+  for (const crit of DATA.criteria){
+    let ok = true;
+    const condTexts = [];
+    for (const cond of crit.conditions){
+      const evalLevel = Math.max(cond.level, state.startLevel);
+      const val = statAtLevel(state, cond.stat, evalLevel);
+      const pass = val >= cond.threshold;
+      if (!pass) ok = false;
+      const adj = evalLevel !== cond.level;
+      condTexts.push({level: cond.level, evalLevel, stat: cond.stat, threshold: cond.threshold, val, pass, adj});
+    }
+    if (ok) total += crit.score;
+    rows.push({id: crit.id, score: crit.score, conds: condTexts, ok});
+  }
+  return {total, rows};
+}
+
+const els = {};
+['weaponSel','weaponSel2','weaponPlus','weaponPlusInput','weaponPlusMaxLabel',
+ 'armorSel','armorSel2','armorPlus','armorPlusInput','armorPlusMaxLabel',
+ 'item1Sel','item2Sel','baseStatGrid','growthStatGrid','equipSummary','resonanceList',
+ 'scoreNum','startLvNote','criteriaTable','levelTable','runOptBtn','optStatus','optList','themeToggle'
+].forEach(id => els[id] = document.getElementById(id));
+
+function populateSelect(sel, list, mapLabel){
+  sel.innerHTML = list.map((it, i) => `<option value="${i}">${mapLabel(it)}</option>`).join('');
+}
+
+populateSelect(els.weaponSel, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax})`);
+populateSelect(els.armorSel, DATA.armors, a => `${a.name}(初期${a.initDef}/上限+${a.plusMax})`);
+populateSelect(els.item1Sel, DATA.items, it => it.name);
+populateSelect(els.item2Sel, DATA.items, it => it.name);
+
+function populateSynthSelect(sel, list, mapLabel, excludeIndex){
+  const prev = sel.value === '' ? '-1' : sel.value;
+  let html = '<option value="-1">なし(合成しない)</option>';
+  list.forEach((it, i) => {
+    if (i === excludeIndex) return;
+    html += `<option value="${i}">${mapLabel(it)}</option>`;
+  });
+  sel.innerHTML = html;
+  // 直前の選択が引き続き有効ならそれを維持、そうでなければ「なし」に戻す
+  const hasPrev = [...sel.options].some(o => o.value === prev);
+  sel.value = (hasPrev && prev !== String(excludeIndex)) ? prev : '-1';
+}
+
+function refreshSynthSelects(){
+  populateSynthSelect(els.weaponSel2, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax})`, +els.weaponSel.value);
+  populateSynthSelect(els.armorSel2, DATA.armors, a => `${a.name}(初期${a.initDef}/上限+${a.plusMax})`, +els.armorSel.value);
+}
+refreshSynthSelects();
+
+function refreshPlusRanges(){
+  const w = getMergedWeapon();
+  const a = getMergedArmor();
+  els.weaponPlus.max = w.plusMax;
+  els.weaponPlusInput.max = w.plusMax;
+  if (+els.weaponPlus.value > w.plusMax) els.weaponPlus.value = w.plusMax;
+  els.weaponPlusMaxLabel.textContent = `(0〜${w.plusMax})`;
+
+  els.armorPlus.max = a.plusMax;
+  els.armorPlusInput.max = a.plusMax;
+  if (+els.armorPlus.value > a.plusMax) els.armorPlus.value = a.plusMax;
+  els.armorPlusMaxLabel.textContent = `(0〜${a.plusMax})`;
+}
+
+function syncPlusInputsFromRange(){
+  els.weaponPlusInput.value = els.weaponPlus.value;
+  els.armorPlusInput.value = els.armorPlus.value;
+}
+
+function render(){
+  refreshPlusRanges();
+  syncPlusInputsFromRange();
+
+  const state = buildState();
+  els.equipSummary.textContent = `武器: ${state.weaponName} / 防具: ${state.armorName}`;
+
+  if (state.resonances.length === 0){
+    els.resonanceList.innerHTML = `<div class="reso-empty">発動している共鳴はありません。</div>`;
+  } else {
+    els.resonanceList.innerHTML = state.resonances.map(r => `
+      <div class="reso-row">
+        <span class="reso-name">${r.name}</span>${r.statEffect ? '<span class="reso-tag">ステータス反映済</span>' : ''}
+        <span class="reso-effect">${r.effect}</span>
+      </div>
+    `).join('');
+  }
+
+  els.baseStatGrid.innerHTML = STATS.map(s => `
+    <div class="stat-box"><div class="label">${STAT_LABEL[s]}</div><div class="val">${Math.floor(state.base[s]*100)/100}</div></div>
+  `).join('');
+  els.growthStatGrid.innerHTML = STATS.map(s => `
+    <div class="stat-box"><div class="label">${STAT_LABEL[s]}</div><div class="val">${Math.round(state.growth[s]*100)/100}</div></div>
+  `).join('');
+
+  const evalResult = evaluateCriteria(state);
+  els.scoreNum.textContent = evalResult.total;
+  els.startLvNote.textContent = state.expBonus > 0
+    ? `経験値ボーナス+${state.expBonus} → 開始Lv${state.startLevel}`
+    : `開始Lv${state.startLevel}`;
+
+  const tbody = els.criteriaTable.querySelector('tbody');
+  tbody.innerHTML = evalResult.rows.map(r => {
+    const condHtml = r.conds.map(c => {
+      const noteLv = c.adj ? `<span class="lv-note">(開始Lvの影響でLv${c.evalLevel}判定)</span>` : '';
+      return `Lv${c.level}で${STAT_LABEL[c.stat]}${c.threshold}以上 &rarr; 現在値${c.val} ${noteLv}`;
+    }).join('<br>');
+    return `<tr>
+      <td>${r.id}</td>
+      <td class="cond-cell">${condHtml}</td>
+      <td class="num">${r.score}</td>
+      <td>${r.ok ? '<span class="badge ok">達成</span>' : '<span class="badge ng">未達成</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  const levelBody = els.levelTable.querySelector('tbody');
+  let levelRows = '';
+  for (let lv = 1; lv <= 50; lv++){
+    const cls = lv === state.startLevel ? ' class="startlv-row"' : '';
+    const vals = STATS.map(s => rawStatAtLevel(state, s, lv).toFixed(1));
+    levelRows += `<tr${cls}><td>Lv${lv}${lv === state.startLevel ? '(開始)' : ''}</td>${vals.map(v => `<td class="num">${v}</td>`).join('')}</tr>`;
+  }
+  levelBody.innerHTML = levelRows;
+}
+
+['weaponSel','armorSel'].forEach(id => els[id].addEventListener('change', () => { refreshSynthSelects(); render(); }));
+['weaponSel2','armorSel2','item1Sel','item2Sel'].forEach(id => els[id].addEventListener('change', render));
+els.weaponPlus.addEventListener('input', render);
+els.armorPlus.addEventListener('input', render);
+
+function clamp(v, min, max){ return Math.min(max, Math.max(min, v)); }
+
+els.weaponPlusInput.addEventListener('input', () => {
+  const max = +els.weaponPlus.max;
+  let v = parseInt(els.weaponPlusInput.value, 10);
+  if (isNaN(v)) return;
+  v = clamp(v, 0, max);
+  els.weaponPlus.value = v;
+  render();
+});
+els.weaponPlusInput.addEventListener('blur', () => { els.weaponPlusInput.value = els.weaponPlus.value; });
+
+els.armorPlusInput.addEventListener('input', () => {
+  const max = +els.armorPlus.max;
+  let v = parseInt(els.armorPlusInput.value, 10);
+  if (isNaN(v)) return;
+  v = clamp(v, 0, max);
+  els.armorPlus.value = v;
+  render();
+});
+els.armorPlusInput.addEventListener('blur', () => { els.armorPlusInput.value = els.armorPlus.value; });
+
+// theme toggle
+(function(){
+  let mode = null;
+  els.themeToggle.addEventListener('click', () => {
+    if (mode === 'dark'){ mode = 'light'; }
+    else if (mode === 'light'){ mode = null; }
+    else { mode = 'dark'; }
+    if (mode) document.documentElement.setAttribute('data-theme', mode);
+    else document.documentElement.removeAttribute('data-theme');
+  });
+})();
+
+// optimizer
+function buildStateWithItems(item1Idx, item2Idx){
+  const weapon = getMergedWeapon();
+  const armor = getMergedArmor();
+  const item1 = DATA.items[item1Idx];
+  const item2 = DATA.items[item2Idx];
+  const weaponPlus = +els.weaponPlus.value;
+  const armorPlus = +els.armorPlus.value;
+  const resoMods = summarizeResonanceStatEffects(getActiveResonances());
+  return calcFromEquip(weapon, weaponPlus, armor, armorPlus, item1, item2, resoMods);
+}
+
+els.runOptBtn.addEventListener('click', () => {
+  const n = DATA.items.length;
+  const results = [];
+  for (let i = 0; i < n; i++){
+    for (let j = i; j < n; j++){
+      const state = buildStateWithItems(i, j);
+      const evalResult = evaluateCriteria(state);
+      if (evalResult.total > 50){
+        results.push({i, j, score: evalResult.total});
+      }
+    }
+  }
+  results.sort((a,b) => b.score - a.score);
+  els.optStatus.textContent = `${results.length}件ヒット(50点超)`;
+  if (results.length === 0){
+    els.optList.innerHTML = `<div class="empty-note">50点を超える組み合わせは見つかりませんでした。</div>`;
+    return;
+  }
+  els.optList.innerHTML = results.map((r, idx) => `
+    <div class="opt-row">
+      <span class="rank">${idx+1}</span>
+      <span class="items">${DATA.items[r.i].name} &times; ${DATA.items[r.j].name}</span>
+      <span class="score">${r.score}点</span>
+    </div>
+  `).join('');
+});
+
+render();
+</script>
+</body>
+</html>
