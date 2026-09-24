@@ -713,7 +713,7 @@ function render(){
   tbody.innerHTML = evalResult.rows.map(r => {
     const condHtml = r.conds.map(c => {
       const noteLv = c.adj ? `<span class="lv-note">(開始Lvの影響でLv${c.evalLevel}判定)</span>` : '';
-      return `Lv${c.level}で${STAT_LABEL[c.stat]}${c.threshold}以上 &rarr; 現在値${c.val} ${noteLv}`;
+      return `Lv${c.level}で${STAT_LABEL[c.stat]}${c.threshold}以上 &rarr; ${c.val} ${noteLv}`;
     }).join('<br>');
     return `<tr>
       <td>${r.id}</td>
