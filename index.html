@@ -126,6 +126,7 @@ h1 small{
   padding: 20px;
 }
 .panel + .panel{ margin-top: 22px; }
+.panel-wide{ margin-bottom: 22px; }
 
 .panel h2{
   font-family: 'Shippori Mincho', serif;
@@ -143,6 +144,21 @@ h1 small{
   background: var(--gold);
   display:inline-block;
   border-radius: 2px;
+}
+.sub-h{
+  font-family: 'Shippori Mincho', serif;
+  font-size: 14px;
+  margin: 0 0 10px;
+  color: var(--ink-dim);
+}
+
+.wide-summary-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+@media (max-width: 720px){
+  .wide-summary-grid{ grid-template-columns: 1fr; }
 }
 
 .field{ margin-bottom: 16px; }
@@ -273,6 +289,26 @@ button.run{
 button.run:hover{ background: var(--gold-soft); }
 .opt-note{ font-size: 12.5px; color: var(--ink-dim); }
 
+.opt-filters{
+  display:flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+.opt-filters label{
+  display:flex;
+  align-items:center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.opt-filters input[type=checkbox]{ accent-color: var(--gold); width:15px; height:15px; }
+
 .opt-list{ display:flex; flex-direction: column; gap: 8px; max-height: 480px; overflow-y:auto; }
 .opt-row{
   display:flex;
@@ -283,10 +319,14 @@ button.run:hover{ background: var(--gold-soft); }
   border-radius: 7px;
   padding: 10px 12px;
   font-size: 13.5px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
 }
+.opt-row:hover{ border-color: var(--gold-soft); background: var(--bg-panel); }
 .opt-row .rank{ font-family: var(--mono); color: var(--ink-dim); width: 26px; }
 .opt-row .items{ flex:1; }
 .opt-row .score{ font-family: var(--mono); font-weight:700; color: var(--gold); font-size: 16px; }
+.opt-row .apply-hint{ font-size: 11px; color: var(--ink-dim); }
 .empty-note{ color: var(--ink-dim); font-size: 13.5px; padding: 20px 0; text-align:center; }
 
 .cond-cell .lv-note{ display:block; font-size: 11px; color: var(--ink-dim); }
@@ -320,14 +360,64 @@ button.run:hover{ background: var(--gold-soft); }
   background: var(--bg-panel);
 }
 #levelTable td.startlv-row, #levelTable tr.startlv-row td{ background: var(--ok-bg); }
+
+.mobile-score-badge{
+  display:none;
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 10px);
+  right: 12px;
+  z-index: 100;
+  background: var(--bg-panel-raised);
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+  padding: 6px 12px;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+  line-height: 1.1;
+}
+.mobile-score-badge .num{
+  font-family: var(--mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.mobile-score-badge .label{
+  font-size: 9px;
+  color: var(--ink-dim);
+  letter-spacing: .03em;
+}
+@media (max-width: 860px){
+  .mobile-score-badge{ display:block; }
+}
 </style>
 </head>
 <body>
+<div class="mobile-score-badge">
+  <div class="num" id="mobileScoreNum">0</div>
+  <div class="label">/ 99点</div>
+</div>
 <div class="wrap">
   <header class="top">
-    <h1>ゆけ！勇者<small>成長予測・森点数</small></h1>
+    <h1>ゆけ！勇者<small>成長予測・採点計算</small></h1>
     <button class="theme-toggle" id="themeToggle" type="button">表示切替</button>
   </header>
+
+  <div class="panel panel-wide">
+    <h2 style="margin-top:0;">基礎値(Lv1)・成長補正</h2>
+    <p class="opt-note" id="equipSummary" style="margin-top:-6px;"></p>
+    <div class="wide-summary-grid">
+      <div>
+        <h3 class="sub-h">基礎値(Lv1)</h3>
+        <div class="stat-grid" id="baseStatGrid"></div>
+      </div>
+      <div>
+        <h3 class="sub-h">成長補正(1レベルあたり)</h3>
+        <div class="stat-grid" id="growthStatGrid"></div>
+      </div>
+    </div>
+    <h3 class="sub-h" style="margin-top:6px;">共鳴</h3>
+    <div id="resonanceList"></div>
+  </div>
 
   <div class="grid">
     <div>
@@ -372,16 +462,6 @@ button.run:hover{ background: var(--gold-soft); }
           <select id="item2Sel"></select>
         </div>
       </div>
-
-      <div class="panel">
-        <h2 style="margin-top:0;">基礎値(Lv1)</h2>
-        <p class="opt-note" id="equipSummary" style="margin-top:-6px;"></p>
-        <div class="stat-grid" id="baseStatGrid"></div>
-        <h2 style="margin-top:4px;">成長補正(1レベルあたり)</h2>
-        <div class="stat-grid" id="growthStatGrid"></div>
-        <h2 style="margin-top:16px;">共鳴</h2>
-        <div id="resonanceList"></div>
-      </div>
     </div>
 
     <div>
@@ -417,7 +497,12 @@ button.run:hover{ background: var(--gold-soft); }
 
       <div class="panel">
         <h2>アイテム最適化検索</h2>
-        <p class="opt-note">現在選択中の武器・防具・プラス値を固定し、アイテム1&times;2の全組み合わせ(重複可)の中から合計50点を超えるものを探して得点順に表示します。</p>
+        <p class="opt-note">現在選択中の武器・防具・強化値を固定し、アイテム1&times;2の全組み合わせ(重複可)の中から合計50点を超えるものを探して得点順に表示します。結果をクリックすると、そのアイテムの組み合わせが上のアイテム選択欄に反映されます。</p>
+        <div class="opt-filters">
+          <label><input type="checkbox" id="incNinniku" checked> ニンニクを候補に含める</label>
+          <label><input type="checkbox" id="incStamina" checked> スタミナドリンクを候補に含める</label>
+          <label><input type="checkbox" id="incJukujitsu" checked> 「熟実」シリーズを候補に含める</label>
+        </div>
         <div class="opt-controls">
           <button class="run" id="runOptBtn" type="button">最適アイテムを検索</button>
           <span class="opt-note" id="optStatus"></span>
@@ -628,7 +713,8 @@ const els = {};
 ['weaponSel','weaponSel2','weaponPlus','weaponPlusInput','weaponPlusMaxLabel',
  'armorSel','armorSel2','armorPlus','armorPlusInput','armorPlusMaxLabel',
  'item1Sel','item2Sel','baseStatGrid','growthStatGrid','equipSummary','resonanceList',
- 'scoreNum','startLvNote','criteriaTable','levelTable','runOptBtn','optStatus','optList','themeToggle'
+ 'scoreNum','mobileScoreNum','startLvNote','criteriaTable','levelTable','runOptBtn','optStatus','optList','themeToggle',
+ 'incNinniku','incStamina','incJukujitsu'
 ].forEach(id => els[id] = document.getElementById(id));
 
 function populateSelect(sel, list, mapLabel){
@@ -705,6 +791,7 @@ function render(){
 
   const evalResult = evaluateCriteria(state);
   els.scoreNum.textContent = evalResult.total;
+  els.mobileScoreNum.textContent = evalResult.total;
   els.startLvNote.textContent = state.expBonus > 0
     ? `経験値ボーナス+${state.expBonus} → 開始Lv${state.startLevel}`
     : `開始Lv${state.startLevel}`;
@@ -784,11 +871,20 @@ function buildStateWithItems(item1Idx, item2Idx){
   return calcFromEquip(weapon, weaponPlus, armor, armorPlus, item1, item2, resoMods);
 }
 
+function isItemEnabledForOptimizer(item){
+  if (item.name === 'ニンニク' && !els.incNinniku.checked) return false;
+  if (item.name === 'スタミナドリンク' && !els.incStamina.checked) return false;
+  if (item.name.includes('熟実') && !els.incJukujitsu.checked) return false;
+  return true;
+}
+
 els.runOptBtn.addEventListener('click', () => {
   const n = DATA.items.length;
   const results = [];
   for (let i = 0; i < n; i++){
+    if (!isItemEnabledForOptimizer(DATA.items[i])) continue;
     for (let j = i; j < n; j++){
+      if (!isItemEnabledForOptimizer(DATA.items[j])) continue;
       const state = buildStateWithItems(i, j);
       const evalResult = evaluateCriteria(state);
       if (evalResult.total > 50){
@@ -803,12 +899,20 @@ els.runOptBtn.addEventListener('click', () => {
     return;
   }
   els.optList.innerHTML = results.map((r, idx) => `
-    <div class="opt-row">
+    <div class="opt-row" data-i="${r.i}" data-j="${r.j}">
       <span class="rank">${idx+1}</span>
-      <span class="items">${DATA.items[r.i].name} &times; ${DATA.items[r.j].name}</span>
+      <span class="items">${DATA.items[r.i].name} &times; ${DATA.items[r.j].name}<span class="apply-hint"><br>クリックして適用</span></span>
       <span class="score">${r.score}点</span>
     </div>
   `).join('');
+  els.optList.querySelectorAll('.opt-row').forEach(row => {
+    row.addEventListener('click', () => {
+      els.item1Sel.value = row.dataset.i;
+      els.item2Sel.value = row.dataset.j;
+      render();
+      els.item1Sel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
 });
 
 render();
