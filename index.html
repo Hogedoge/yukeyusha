@@ -116,7 +116,7 @@ h1{
   border-radius: 10px;
   padding: 20px;
 }
-.panel + .panel{ margin-top: 22px; }
+.panel + .panel, details.panel + .panel, .panel + details.panel{ margin-top: 22px; }
 .panel-wide{ margin-bottom: 22px; }
 
 .panel h2{
@@ -136,6 +136,33 @@ h1{
   display:inline-block;
   border-radius: 2px;
 }
+
+/* details 折りたたみスタイル */
+details.panel summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+details.panel summary::-webkit-details-marker {
+  display: none;
+}
+details.panel summary h2 {
+  margin: 0;
+}
+details.panel summary h2::after {
+  content: '▼';
+  font-size: 12px;
+  margin-left: auto;
+  color: var(--ink-dim);
+  transition: transform 0.2s ease;
+}
+details.panel[open] summary h2::after {
+  transform: rotate(180deg);
+}
+details.panel .details-content {
+  margin-top: 16px;
+}
+
 .sub-h{
   font-family: 'Shippori Mincho', serif;
   font-size: 14px;
@@ -392,7 +419,7 @@ button.run:hover{ background: var(--gold-soft); }
 </div>
 <div class="wrap">
   <header class="top">
-    <h1>ゆけ！勇者</h1>
+    <h1>鍛錬の森・点数採点シミュ</h1>
     <button class="theme-toggle" id="themeToggle" type="button">表示切替</button>
   </header>
 
@@ -466,22 +493,10 @@ button.run:hover{ background: var(--gold-soft); }
         </div>
       </div>
 
-      <div class="panel">
-        <h2>レベル別ステータス一覧(Lv1〜50)</h2>
-        <p class="opt-note">検証用に、四捨五入する前の生の値を小数第一位まで表示しています。採点判定は四捨五入した整数値で行われます。</p>
-        <div class="overflow-x level-table-wrap">
-          <table id="levelTable">
-            <thead>
-              <tr><th>Lv</th><th class="num">HP</th><th class="num">攻撃</th><th class="num">防御</th><th class="num">回避</th><th class="num">運</th></tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
-
+      <!-- アイテム最適化検索 -->
       <div class="panel">
         <h2>アイテム最適化検索</h2>
-        <p class="opt-note">現在選択中の武器・防具・強化値を固定し、アイテム1&times;2の全組み合わせ(重複可)の中から合計50点を超えるものを探して得点順に表示します。武器または防具を「なし」にしている場合は、その空欄側についても全候補(強化値は上限)を含めて探索します。結果をクリックすると、その組み合わせが上の選択欄に反映されます。</p>
+        <p class="opt-note">現在選択中の武器・防具・強化値を固定し、アイテム1&times;2の全組み合わせ(重複可)の中から合計50点を超えるものを探して得点順に表示します。武器または防具を「なし」にしている場合は、単体装備およびレア度合計7以下の合成装備を含めて探索します。結果をクリックすると、その組み合わせが上の選択欄に反映されます。</p>
         <div class="opt-filters">
           <label><input type="checkbox" id="incRare" checked> レアアイテムを使用する(ニンニク・スタミナドリンク・桜餅・力餅)</label>
           <label><input type="checkbox" id="incJukujitsu" checked> 「熟実」シリーズを候補に含める</label>
@@ -492,15 +507,226 @@ button.run:hover{ background: var(--gold-soft); }
         </div>
         <div class="opt-list" id="optList"></div>
       </div>
+
+      <!-- レベル別ステータス一覧(Lv1〜50) -->
+      <details class="panel">
+        <summary>
+          <h2>レベル別ステータス一覧(Lv1〜50)</h2>
+        </summary>
+        <div class="details-content">
+          <p class="opt-note">検証用に、四捨五入する前の生の値を小数第一位まで表示しています。採点判定は四捨五入した整数値で行われます。</p>
+          <div class="overflow-x level-table-wrap">
+            <table id="levelTable">
+              <thead>
+                <tr><th>Lv</th><th class="num">HP</th><th class="num">攻撃</th><th class="num">防御</th><th class="num">回避</th><th class="num">運</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </details>
     </div>
   </div>
 </div>
 
 <script>
-const DATA = {"baseStats": {"HP": 30, "ATK": 5, "DEF": 5, "EVA": 5, "LUK": 5}, "baseGrowth": {"HP": 5.5, "ATK": 2.5, "DEF": 2.5, "EVA": 2.3, "LUK": 1.1}, "weapons": [{"name": "ショートソード", "initAtk": 5, "plusMax": 200, "baseMods": {}, "growthMods": {}}, {"name": "ロングソード", "initAtk": 9, "plusMax": 45, "baseMods": {}, "growthMods": {}}, {"name": "ブロンズソード", "initAtk": 15, "plusMax": 45, "baseMods": {}, "growthMods": {}}, {"name": "ナイトソード", "initAtk": 19, "plusMax": 45, "baseMods": {}, "growthMods": {"ATK": 1}}, {"name": "ヘビーソード", "initAtk": 25, "plusMax": 80, "baseMods": {"EVA": -3}, "growthMods": {"ATK": 3, "EVA": -1}}, {"name": "盗賊のナイフ", "initAtk": 15, "plusMax": 30, "baseMods": {"LUK": 20}, "growthMods": {}}, {"name": "バスターソード", "initAtk": 25, "plusMax": 45, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 2, "DEF": 1}}, {"name": "ミスリルソード", "initAtk": 29, "plusMax": 60, "baseMods": {}, "growthMods": {"ATK": 3}}, {"name": "幸運の剣", "initAtk": 30, "plusMax": 30, "baseMods": {"LUK": 25}, "growthMods": {"LUK": 1}}, {"name": "ドラゴンソード", "initAtk": 35, "plusMax": 45, "baseMods": {"DEF": 5}, "growthMods": {"ATK": 2, "DEF": 1}}, {"name": "ディフェンダー", "initAtk": 35, "plusMax": 30, "baseMods": {"DEF": 20}, "growthMods": {"ATK": 2, "DEF": 2, "EVA": 1}}, {"name": "正宗", "initAtk": 35, "plusMax": 500, "baseMods": {}, "growthMods": {"ATK": 4}}, {"name": "プラチナソード", "initAtk": 39, "plusMax": 45, "baseMods": {}, "growthMods": {"ATK": 3, "DEF": 1, "EVA": 1}}, {"name": "ブラッドソード", "initAtk": 40, "plusMax": 45, "baseMods": {"HP": -5}, "growthMods": {"HP": -1, "ATK": 4, "LUK": -1}}, {"name": "妖刀黒雫", "initAtk": 45, "plusMax": 300, "baseMods": {"HP": -10}, "growthMods": {"HP": -1, "ATK": 5, "LUK": -1}}, {"name": "エンハンスソード", "initAtk": 50, "plusMax": 90, "baseMods": {}, "growthMods": {"ATK": 4}}, {"name": "ルーンブレイド", "initAtk": 55, "plusMax": 45, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 5, "DEF": 1, "EVA": 5}}, {"name": "クレイモア", "initAtk": 70, "plusMax": 60, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 6, "DEF": 1}}, {"name": "レイピア", "initAtk": 75, "plusMax": 60, "baseMods": {"HP": 20}, "growthMods": {"HP": 3, "ATK": 4, "DEF": 1}}, {"name": "ダンスソード", "initAtk": 40, "plusMax": 30, "baseMods": {"EVA": 1000}, "growthMods": {"HP": 1, "ATK": 4, "DEF": 1, "EVA": 15}}, {"name": "水龍の剣", "initAtk": 60, "plusMax": 75, "baseMods": {"HP": 20, "DEF": 10}, "growthMods": {"HP": 5, "ATK": 5, "DEF": 1}}, {"name": "ダークブレイド", "initAtk": 65, "plusMax": 90, "baseMods": {"HP": -10, "DEF": -3, "EVA": -3}, "growthMods": {"HP": -2, "ATK": 6, "DEF": -1, "LUK": -2}}, {"name": "アークブレイド", "initAtk": 70, "plusMax": 75, "baseMods": {"HP": 10, "DEF": 15}, "growthMods": {"HP": 2, "ATK": 5, "DEF": 2, "EVA": 3}}, {"name": "竜神の剣", "initAtk": 75, "plusMax": 75, "baseMods": {"HP": 10, "DEF": 35}, "growthMods": {"HP": 2, "ATK": 4, "DEF": 3, "EVA": 3}}, {"name": "光輝の剣", "initAtk": 65, "plusMax": 15, "baseMods": {"DEF": 50}, "growthMods": {"ATK": 6, "DEF": 4, "EVA": 5}, "special": "boostArmorInit30"}, {"name": "漆黒の剣", "initAtk": 90, "plusMax": 15, "baseMods": {"HP": -20}, "growthMods": {"HP": -4, "ATK": 9}}, {"name": "くない", "initAtk": 20, "plusMax": 100, "baseMods": {"EVA": 50}, "growthMods": {"ATK": 3, "EVA": 10}}, {"name": "鉄のナイフ", "initAtk": 3, "plusMax": 15, "baseMods": {}, "growthMods": {"LUK": 1}}, {"name": "銀のナイフ", "initAtk": 2, "plusMax": 15, "baseMods": {"LUK": 20}, "growthMods": {"LUK": 1}}, {"name": "金のナイフ", "initAtk": 1, "plusMax": 30, "baseMods": {"LUK": 20}, "growthMods": {"LUK": 1}}, {"name": "ダイヤのナイフ", "initAtk": 20, "plusMax": 60, "baseMods": {"LUK": 40}, "growthMods": {"LUK": 2}}, {"name": "鉄の剣", "initAtk": 5, "plusMax": 15, "baseMods": {}, "growthMods": {"LUK": 1}}, {"name": "銀の剣", "initAtk": 4, "plusMax": 15, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}}, {"name": "金の剣", "initAtk": 3, "plusMax": 30, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}}, {"name": "ダイヤの剣", "initAtk": 30, "plusMax": 90, "baseMods": {"LUK": 40}, "growthMods": {"LUK": 2}}, {"name": "鉄の斧", "initAtk": 30, "plusMax": 60, "baseMods": {}, "growthMods": {"ATK": 6, "LUK": 1}}, {"name": "銀の斧", "initAtk": 4, "plusMax": 15, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}}, {"name": "金の斧", "initAtk": 3, "plusMax": 30, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}}, {"name": "オニの金棒", "initAtk": 15, "plusMax": 15, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}}, {"name": "チョコバー", "initAtk": 15, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "桜橘の刀", "initAtk": 15, "plusMax": 90, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}}, {"name": "流星の剣", "initAtk": 15, "plusMax": 15, "baseMods": {"EVA": 2500}, "growthMods": {"ATK": 1, "EVA": 10}}, {"name": "粋夏の刀", "initAtk": 15, "plusMax": 90, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}}, {"name": "キャンディケイン", "initAtk": 5, "plusMax": 5, "baseMods": {}, "growthMods": {}}, {"name": "粽大刀", "initAtk": 5, "plusMax": 55, "baseMods": {"HP": 5, "DEF": 5, "LUK": 5, "EVA": 55}, "growthMods": {"EVA": 5, "LUK": 5}}, {"name": "アニバーサリーソード", "initAtk": 15, "plusMax": 200, "baseMods": {}, "growthMods": {}}, {"name": "竹刀", "initAtk": 5, "plusMax": 5, "baseMods": {}, "growthMods": {}}, {"name": "セラミックソード", "initAtk": 150, "plusMax": 5, "baseMods": {}, "growthMods": {}}, {"name": "サバイバルナイフ", "initAtk": 30, "plusMax": 30, "baseMods": {}, "growthMods": {}}], "armors": [{"name": "冒険者の服", "initDef": 5, "plusMax": 200, "baseMods": {}, "growthMods": {}}, {"name": "冒険者の鎧", "initDef": 9, "plusMax": 45, "baseMods": {}, "growthMods": {}}, {"name": "青銅の鎧", "initDef": 15, "plusMax": 45, "baseMods": {}, "growthMods": {}}, {"name": "ナイトメイル", "initDef": 19, "plusMax": 45, "baseMods": {}, "growthMods": {"DEF": 1}}, {"name": "ヘビーメイル", "initDef": 25, "plusMax": 90, "baseMods": {"EVA": -3}, "growthMods": {"DEF": 2, "EVA": -1}}, {"name": "バスターメイル", "initDef": 25, "plusMax": 45, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 1, "DEF": 2}}, {"name": "ミスリルメイル", "initDef": 29, "plusMax": 60, "baseMods": {}, "growthMods": {"DEF": 3}}, {"name": "ドラゴンアーマー", "initDef": 30, "plusMax": 45, "baseMods": {"ATK": 5}, "growthMods": {"HP": 3, "ATK": 1, "DEF": 2}}, {"name": "グロウメイル", "initDef": 25, "plusMax": 60, "baseMods": {}, "growthMods": {"HP": 3, "ATK": 2, "DEF": 2, "EVA": 1, "LUK": 1}}, {"name": "幸運の鎧", "initDef": 30, "plusMax": 30, "baseMods": {"LUK": 25}, "growthMods": {"LUK": 1}}, {"name": "生命の鎧", "initDef": 35, "plusMax": 45, "baseMods": {"HP": 50}, "growthMods": {"HP": 5, "DEF": 3}}, {"name": "プラチナメイル", "initDef": 39, "plusMax": 45, "baseMods": {}, "growthMods": {"ATK": 1, "DEF": 4, "EVA": 3}}, {"name": "ブラッドメイル", "initDef": 35, "plusMax": 45, "baseMods": {"HP": 20, "LUK": -10}, "growthMods": {"HP": 1, "DEF": 6, "LUK": -2}}, {"name": "オフェンサー", "initDef": 35, "plusMax": 30, "baseMods": {"ATK": 20}, "growthMods": {"ATK": 2, "DEF": 2, "EVA": 1}}, {"name": "エンハンスメイル", "initDef": 50, "plusMax": 90, "baseMods": {}, "growthMods": {"DEF": 6}}, {"name": "ルーンメイル", "initDef": 55, "plusMax": 45, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 1, "DEF": 7, "EVA": 5}}, {"name": "ハイランドメイル", "initDef": 70, "plusMax": 60, "baseMods": {"HP": 30}, "growthMods": {"HP": 1, "DEF": 8, "EVA": 6}}, {"name": "チェインメイル", "initDef": 75, "plusMax": 60, "baseMods": {"HP": 20}, "growthMods": {"HP": 3, "ATK": 1, "DEF": 6}}, {"name": "身かわしの鎧", "initDef": 35, "plusMax": 30, "baseMods": {"EVA": 1000}, "growthMods": {"DEF": 4, "EVA": 15}}, {"name": "龍鱗の鎧", "initDef": 60, "plusMax": 75, "baseMods": {"HP": 20}, "growthMods": {"HP": 5, "DEF": 7}}, {"name": "ダークメイル", "initDef": 65, "plusMax": 90, "baseMods": {"HP": -10, "ATK": -3, "EVA": -3}, "growthMods": {"HP": -2, "ATK": -1, "DEF": 8, "LUK": -3}}, {"name": "アークメイル", "initDef": 70, "plusMax": 75, "baseMods": {"HP": 10, "ATK": 15, "EVA": 10}, "growthMods": {"HP": 2, "ATK": 2, "DEF": 5, "EVA": 3}}, {"name": "太陽の鎧", "initDef": 65, "plusMax": 15, "baseMods": {"EVA": 10}, "growthMods": {"ATK": 3, "DEF": 6, "EVA": 5}, "special": "boostWeaponInit30"}, {"name": "甲冑", "initDef": 60, "plusMax": 150, "baseMods": {}, "growthMods": {"DEF": 7}}, {"name": "漆黒の鎧", "initDef": 90, "plusMax": 15, "baseMods": {"HP": -20}, "growthMods": {"HP": -4, "DEF": 9}}, {"name": "忍装束", "initDef": 15, "plusMax": 100, "baseMods": {"EVA": 50}, "growthMods": {"DEF": 3, "EVA": 10}}, {"name": "黒霧の衣", "initDef": 45, "plusMax": 300, "baseMods": {"HP": -10}, "growthMods": {"HP": -1, "DEF": 5, "LUK": -1}}, {"name": "正宗紋の鎧", "initDef": 35, "plusMax": 500, "baseMods": {}, "growthMods": {"DEF": 4}}, {"name": "鉄の鎧", "initDef": 30, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "銀の鎧", "initDef": 8, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "金の鎧", "initDef": 6, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "ダイヤの鎧", "initDef": 90, "plusMax": 15, "baseMods": {}, "growthMods": {"DEF": 5, "LUK": 3}}, {"name": "オニのパンツ", "initDef": 15, "plusMax": 15, "baseMods": {}, "growthMods": {"HP": 1, "DEF": 1}}, {"name": "菱餅大鎧", "initDef": 30, "plusMax": 15, "baseMods": {}, "growthMods": {"EVA": -1}}, {"name": "クッキーメイル", "initDef": 5, "plusMax": 15, "baseMods": {}, "growthMods": {}}, {"name": "端午の鎧", "initDef": 5, "plusMax": 55, "baseMods": {"HP": 5, "ATK": 5, "EVA": 5, "LUK": 5}, "growthMods": {"EVA": 5, "LUK": 5}}, {"name": "キッズマント", "initDef": 10, "plusMax": 15, "baseMods": {"EVA": 50}, "growthMods": {}}, {"name": "ターキーメイル", "initDef": 10, "plusMax": 15, "baseMods": {}, "growthMods": {"HP": 2, "EVA": 2}}, {"name": "アニバーサリーメイル", "initDef": 15, "plusMax": 200, "baseMods": {}, "growthMods": {}}, {"name": "セラミックメイル", "initDef": 150, "plusMax": 5, "baseMods": {}, "growthMods": {}}], "items": [{"name": "生命の木の葉", "initMods": {"HP": 10}, "growthMods": {}, "special": null}, {"name": "豪腕の木の葉", "initMods": {"ATK": 5}, "growthMods": {}, "special": null}, {"name": "守りの木の葉", "initMods": {"DEF": 5}, "growthMods": {}, "special": null}, {"name": "回避の木の葉", "initMods": {"EVA": 50}, "growthMods": {}, "special": null}, {"name": "運気の木の葉", "initMods": {"LUK": 3}, "growthMods": {}, "special": null}, {"name": "経験の木の葉", "initMods": {"LUK": 3, "EXP": 50}, "growthMods": {}, "special": null}, {"name": "生命の木の大葉", "initMods": {"HP": 100}, "growthMods": {}, "special": null}, {"name": "豪腕の木の大葉", "initMods": {"ATK": 50}, "growthMods": {}, "special": null}, {"name": "守りの木の大葉", "initMods": {"DEF": 30}, "growthMods": {}, "special": null}, {"name": "回避の木の大葉", "initMods": {"EVA": 200}, "growthMods": {}, "special": null}, {"name": "運気の木の大葉", "initMods": {"LUK": 30}, "growthMods": {}, "special": null}, {"name": "体力の木の大葉", "initMods": {"ATK": 50, "DEF": 15}, "growthMods": {}, "special": null}, {"name": "守護の木の大葉", "initMods": {"DEF": 15, "EVA": 50}, "growthMods": {}, "special": null}, {"name": "経験の木の大葉", "initMods": {"LUK": 3, "EXP": 100}, "growthMods": {}, "special": null}, {"name": "生命の木の実", "initMods": {}, "growthMods": {"HP": 5}, "special": null}, {"name": "豪腕の木の実", "initMods": {}, "growthMods": {"ATK": 2}, "special": null}, {"name": "守りの木の実", "initMods": {}, "growthMods": {"DEF": 2}, "special": null}, {"name": "回避の木の実", "initMods": {}, "growthMods": {"EVA": 5}, "special": null}, {"name": "運気の木の実", "initMods": {}, "growthMods": {"LUK": 1}, "special": null}, {"name": "体力の木の実", "initMods": {}, "growthMods": {"ATK": 2, "DEF": 1}, "special": null}, {"name": "守護の木の実", "initMods": {}, "growthMods": {"DEF": 1, "EVA": 2}, "special": null}, {"name": "生命の木の熟実", "initMods": {}, "growthMods": {"HP": 8}, "special": null}, {"name": "豪腕の木の熟実", "initMods": {}, "growthMods": {"ATK": 4}, "special": null}, {"name": "守りの木の熟実", "initMods": {}, "growthMods": {"DEF": 4}, "special": null}, {"name": "回避の木の熟実", "initMods": {}, "growthMods": {"EVA": 10}, "special": null}, {"name": "運気の木の熟実", "initMods": {}, "growthMods": {"LUK": 2}, "special": null}, {"name": "スタミナドリンク", "initMods": {"HP": 80}, "growthMods": {"HP": 5}, "special": null}, {"name": "ニンニク", "initMods": {"ATK": 15, "DEF": 10}, "growthMods": {"ATK": 2, "DEF": 1}, "special": null}, {"name": "力餅", "initMods": {}, "growthMods": {}, "special": "doubleWeaponInit"}, {"name": "桜餅", "initMods": {}, "growthMods": {"HP": 2, "ATK": 1, "DEF": 1, "EVA": 1, "LUK": 1}, "special": null}], "criteria": [{"id": "H1", "score": 5, "conditions": [{"level": 1, "stat": "HP", "threshold": 70}]}, {"id": "H2", "score": 7, "conditions": [{"level": 14, "stat": "HP", "threshold": 195}]}, {"id": "H3", "score": 7, "conditions": [{"level": 14, "stat": "HP", "threshold": 245}]}, {"id": "H4", "score": 5, "conditions": [{"level": 14, "stat": "HP", "threshold": 295}]}, {"id": "H5", "score": 2, "conditions": [{"level": 14, "stat": "HP", "threshold": 345}]}, {"id": "A1", "score": 5, "conditions": [{"level": 8, "stat": "ATK", "threshold": 102}, {"level": 12, "stat": "ATK", "threshold": 120}]}, {"id": "A2", "score": 10, "conditions": [{"level": 8, "stat": "ATK", "threshold": 123}, {"level": 12, "stat": "ATK", "threshold": 147}]}, {"id": "A3", "score": 5, "conditions": [{"level": 8, "stat": "ATK", "threshold": 138}, {"level": 12, "stat": "ATK", "threshold": 163}]}, {"id": "A4", "score": 10, "conditions": [{"level": 8, "stat": "ATK", "threshold": 165}, {"level": 12, "stat": "ATK", "threshold": 192}]}, {"id": "A5", "score": 7, "conditions": [{"level": 8, "stat": "ATK", "threshold": 196}, {"level": 12, "stat": "ATK", "threshold": 229}]}, {"id": "D1", "score": 10, "conditions": [{"level": 10, "stat": "DEF", "threshold": 219}]}, {"id": "D2", "score": 10, "conditions": [{"level": 14, "stat": "DEF", "threshold": 272}]}, {"id": "D3", "score": 7, "conditions": [{"level": 8, "stat": "DEF", "threshold": 219}]}, {"id": "D4", "score": 7, "conditions": [{"level": 12, "stat": "DEF", "threshold": 272}]}, {"id": "D5", "score": 2, "conditions": [{"level": 14, "stat": "DEF", "threshold": 321}]}]};
+const DATA = {
+  "baseStats": {"HP": 30, "ATK": 5, "DEF": 5, "EVA": 5, "LUK": 5},
+  "baseGrowth": {"HP": 5.5, "ATK": 2.5, "DEF": 2.5, "EVA": 2.3, "LUK": 1.1},
+  "weapons": [
+    {"name": "ショートソード", "initAtk": 5, "plusMax": 200, "rarity": 1, "baseMods": {}, "growthMods": {}},
+    {"name": "ロングソード", "initAtk": 9, "plusMax": 45, "rarity": 1, "baseMods": {}, "growthMods": {}},
+    {"name": "ブロンズソード", "initAtk": 15, "plusMax": 45, "rarity": 1, "baseMods": {}, "growthMods": {}},
+    {"name": "ナイトソード", "initAtk": 19, "plusMax": 45, "rarity": 1, "baseMods": {}, "growthMods": {"ATK": 1}},
+    {"name": "ヘビーソード", "initAtk": 25, "plusMax": 80, "rarity": 1, "baseMods": {"EVA": -3}, "growthMods": {"ATK": 3, "EVA": -1}},
+    {"name": "盗賊のナイフ", "initAtk": 15, "plusMax": 30, "rarity": 3, "baseMods": {"LUK": 20}, "growthMods": {}},
+    {"name": "バスターソード", "initAtk": 25, "plusMax": 45, "rarity": 2, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 2, "DEF": 1}},
+    {"name": "ミスリルソード", "initAtk": 29, "plusMax": 60, "rarity": 2, "baseMods": {}, "growthMods": {"ATK": 3}},
+    {"name": "幸運の剣", "initAtk": 30, "plusMax": 30, "rarity": 4, "baseMods": {"LUK": 25}, "growthMods": {"LUK": 1}},
+    {"name": "ドラゴンソード", "initAtk": 35, "plusMax": 45, "rarity": 2, "baseMods": {"DEF": 5}, "growthMods": {"ATK": 2, "DEF": 1}},
+    {"name": "ディフェンダー", "initAtk": 35, "plusMax": 30, "rarity": 4, "baseMods": {"DEF": 20}, "growthMods": {"ATK": 2, "DEF": 2, "EVA": 1}},
+    {"name": "正宗", "initAtk": 35, "plusMax": 500, "rarity": 3, "baseMods": {}, "growthMods": {"ATK": 4}},
+    {"name": "プラチナソード", "initAtk": 39, "plusMax": 45, "rarity": 2, "baseMods": {}, "growthMods": {"ATK": 3, "DEF": 1, "EVA": 1}},
+    {"name": "ブラッドソード", "initAtk": 40, "plusMax": 45, "rarity": 2, "baseMods": {"HP": -5}, "growthMods": {"HP": -1, "ATK": 4, "LUK": -1}},
+    {"name": "妖刀黒雫", "initAtk": 45, "plusMax": 300, "rarity": 3, "baseMods": {"HP": -10}, "growthMods": {"HP": -1, "ATK": 5, "LUK": -1}},
+    {"name": "エンハンスソード", "initAtk": 50, "plusMax": 90, "rarity": 2, "baseMods": {}, "growthMods": {"ATK": 4}},
+    {"name": "ルーンブレイド", "initAtk": 55, "plusMax": 45, "rarity": 2, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 5, "DEF": 1, "EVA": 5}},
+    {"name": "クレイモア", "initAtk": 70, "plusMax": 60, "rarity": 2, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 6, "DEF": 1}},
+    {"name": "レイピア", "initAtk": 75, "plusMax": 60, "rarity": 2, "baseMods": {"HP": 20}, "growthMods": {"HP": 3, "ATK": 4, "DEF": 1}},
+    {"name": "ダンスソード", "initAtk": 40, "plusMax": 30, "rarity": 3, "baseMods": {"EVA": 1000}, "growthMods": {"HP": 1, "ATK": 4, "DEF": 1, "EVA": 15}},
+    {"name": "水龍の剣", "initAtk": 60, "plusMax": 75, "rarity": 3, "baseMods": {"HP": 20, "DEF": 10}, "growthMods": {"HP": 5, "ATK": 5, "DEF": 1}},
+    {"name": "ダークブレイド", "initAtk": 65, "plusMax": 90, "rarity": 3, "baseMods": {"HP": -10, "DEF": -3, "EVA": -3}, "growthMods": {"HP": -2, "ATK": 6, "DEF": -1, "LUK": -2}},
+    {"name": "アークブレイド", "initAtk": 70, "plusMax": 75, "rarity": 4, "baseMods": {"HP": 10, "DEF": 15}, "growthMods": {"HP": 2, "ATK": 5, "DEF": 2, "EVA": 3}},
+    {"name": "竜神の剣", "initAtk": 75, "plusMax": 75, "rarity": 4, "baseMods": {"HP": 10, "DEF": 35}, "growthMods": {"HP": 2, "ATK": 4, "DEF": 3, "EVA": 3}},
+    {"name": "光輝の剣", "initAtk": 65, "plusMax": 15, "rarity": 4, "baseMods": {"DEF": 50}, "growthMods": {"ATK": 6, "DEF": 4, "EVA": 5}, "special": "boostArmorInit30"},
+    {"name": "漆黒の剣", "initAtk": 90, "plusMax": 15, "rarity": 5, "baseMods": {"HP": -20}, "growthMods": {"HP": -4, "ATK": 9}},
+    {"name": "くない", "initAtk": 20, "plusMax": 100, "rarity": 3, "baseMods": {"EVA": 50}, "growthMods": {"ATK": 3, "EVA": 10}},
+    {"name": "鉄のナイフ", "initAtk": 3, "plusMax": 15, "rarity": 1, "baseMods": {}, "growthMods": {"LUK": 1}},
+    {"name": "銀のナイフ", "initAtk": 2, "plusMax": 15, "rarity": 3, "baseMods": {"LUK": 20}, "growthMods": {"LUK": 1}},
+    {"name": "金のナイフ", "initAtk": 1, "plusMax": 30, "rarity": 4, "baseMods": {"LUK": 20}, "growthMods": {"LUK": 1}},
+    {"name": "ダイヤのナイフ", "initAtk": 20, "plusMax": 60, "rarity": 5, "baseMods": {"LUK": 40}, "growthMods": {"LUK": 2}},
+    {"name": "鉄の剣", "initAtk": 5, "plusMax": 15, "rarity": 1, "baseMods": {}, "growthMods": {"LUK": 1}},
+    {"name": "銀の剣", "initAtk": 4, "plusMax": 15, "rarity": 3, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}},
+    {"name": "金の剣", "initAtk": 3, "plusMax": 30, "rarity": 4, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}},
+    {"name": "ダイヤの剣", "initAtk": 30, "plusMax": 90, "rarity": 5, "baseMods": {"LUK": 40}, "growthMods": {"LUK": 2}},
+    {"name": "鉄の斧", "initAtk": 30, "plusMax": 60, "rarity": 1, "baseMods": {}, "growthMods": {"ATK": 6, "LUK": 1}},
+    {"name": "銀の斧", "initAtk": 4, "plusMax": 15, "rarity": 3, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}},
+    {"name": "金の斧", "initAtk": 3, "plusMax": 30, "rarity": 4, "baseMods": {"LUK": 30}, "growthMods": {"LUK": 1}},
+    {"name": "オニの金棒", "initAtk": 15, "plusMax": 15, "rarity": 4, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}},
+    {"name": "チョコバー", "initAtk": 15, "plusMax": 15, "rarity": 4, "baseMods": {}, "growthMods": {}},
+    {"name": "桜橘の刀", "initAtk": 15, "plusMax": 90, "rarity": 4, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}},
+    {"name": "流星の剣", "initAtk": 15, "plusMax": 15, "rarity": 4, "baseMods": {"EVA": 2500}, "growthMods": {"ATK": 1, "EVA": 10}},
+    {"name": "粋夏の刀", "initAtk": 15, "plusMax": 90, "rarity": 4, "baseMods": {}, "growthMods": {"ATK": 1, "EVA": 1}},
+    {"name": "キャンディケイン", "initAtk": 5, "plusMax": 5, "rarity": 4, "baseMods": {}, "growthMods": {}},
+    {"name": "粽大刀", "initAtk": 5, "plusMax": 55, "rarity": 4, "baseMods": {"HP": 5, "DEF": 5, "LUK": 5, "EVA": 55}, "growthMods": {"EVA": 5, "LUK": 5}},
+    {"name": "アニバーサリーソード", "initAtk": 15, "plusMax": 200, "rarity": 4, "baseMods": {}, "growthMods": {}},
+    {"name": "竹刀", "initAtk": 5, "plusMax": 5, "rarity": 4, "baseMods": {}, "growthMods": {}},
+    {"name": "セラミックソード", "initAtk": 150, "plusMax": 15, "rarity": 2, "baseMods": {}, "growthMods": {}},
+    {"name": "サバイバルナイフ", "initAtk": 30, "plusMax": 30, "rarity": 5, "baseMods": {}, "growthMods": {}}
+  ],
+  "armors": [
+    {"name": "冒険者の服", "initDef": 5, "plusMax": 200, "rarity": 1, "baseMods": {}, "growthMods": {}},
+    {"name": "冒険者の鎧", "initDef": 9, "plusMax": 45, "rarity": 1, "baseMods": {}, "growthMods": {}},
+    {"name": "青銅の鎧", "initDef": 15, "plusMax": 45, "rarity": 1, "baseMods": {}, "growthMods": {}},
+    {"name": "ナイトメイル", "initDef": 19, "plusMax": 45, "rarity": 1, "baseMods": {}, "growthMods": {"DEF": 1}},
+    {"name": "ヘビーメイル", "initDef": 25, "plusMax": 90, "rarity": 1, "baseMods": {"EVA": -3}, "growthMods": {"DEF": 2, "EVA": -1}},
+    {"name": "バスターメイル", "initDef": 25, "plusMax": 45, "rarity": 2, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 1, "DEF": 2}},
+    {"name": "ミスリルメイル", "initDef": 29, "plusMax": 60, "rarity": 2, "baseMods": {}, "growthMods": {"DEF": 3}},
+    {"name": "ドラゴンアーマー", "initDef": 30, "plusMax": 45, "rarity": 2, "baseMods": {"ATK": 5}, "growthMods": {"HP": 3, "ATK": 1, "DEF": 2}},
+    {"name": "グロウメイル", "initDef": 25, "plusMax": 60, "rarity": 4, "baseMods": {}, "growthMods": {"HP": 3, "ATK": 2, "DEF": 2, "EVA": 1, "LUK": 1}},
+    {"name": "幸運の鎧", "initDef": 30, "plusMax": 30, "rarity": 4, "baseMods": {"LUK": 25}, "growthMods": {"LUK": 1}},
+    {"name": "生命の鎧", "initDef": 35, "plusMax": 45, "rarity": 3, "baseMods": {"HP": 50}, "growthMods": {"HP": 5, "DEF": 3}},
+    {"name": "プラチナメイル", "initDef": 39, "plusMax": 45, "rarity": 2, "baseMods": {}, "growthMods": {"ATK": 1, "DEF": 4, "EVA": 3}},
+    {"name": "ブラッドメイル", "initDef": 35, "plusMax": 45, "rarity": 2, "baseMods": {"HP": 20, "LUK": -10}, "growthMods": {"HP": 1, "DEF": 6, "LUK": -2}},
+    {"name": "オフェンサー", "initDef": 35, "plusMax": 30, "rarity": 3, "baseMods": {"ATK": 20}, "growthMods": {"ATK": 2, "DEF": 2, "EVA": 1}},
+    {"name": "エンハンスメイル", "initDef": 50, "plusMax": 90, "rarity": 2, "baseMods": {}, "growthMods": {"DEF": 6}},
+    {"name": "ルーンメイル", "initDef": 55, "plusMax": 45, "rarity": 2, "baseMods": {}, "growthMods": {"HP": 1, "ATK": 1, "DEF": 7, "EVA": 5}},
+    {"name": "ハイランドメイル", "initDef": 70, "plusMax": 60, "rarity": 2, "baseMods": {"HP": 30}, "growthMods": {"HP": 1, "DEF": 8, "EVA": 6}},
+    {"name": "チェインメイル", "initDef": 75, "plusMax": 60, "rarity": 2, "baseMods": {"HP": 20}, "growthMods": {"HP": 3, "ATK": 1, "DEF": 6}},
+    {"name": "身かわしの鎧", "initDef": 35, "plusMax": 30, "rarity": 3, "baseMods": {"EVA": 1000}, "growthMods": {"DEF": 4, "EVA": 15}},
+    {"name": "龍鱗の鎧", "initDef": 60, "plusMax": 75, "rarity": 3, "baseMods": {"HP": 20}, "growthMods": {"HP": 5, "DEF": 7}},
+    {"name": "ダークメイル", "initDef": 65, "plusMax": 90, "rarity": 3, "baseMods": {"HP": -10, "ATK": -3, "EVA": -3}, "growthMods": {"HP": -2, "ATK": -1, "DEF": 8, "LUK": -3}},
+    {"name": "アークメイル", "initDef": 70, "plusMax": 75, "rarity": 4, "baseMods": {"HP": 10, "ATK": 15, "EVA": 10}, "growthMods": {"HP": 2, "ATK": 2, "DEF": 5, "EVA": 3}},
+    {"name": "太陽の鎧", "initDef": 65, "plusMax": 15, "rarity": 4, "baseMods": {"EVA": 10}, "growthMods": {"ATK": 3, "DEF": 6, "EVA": 5}, "special": "boostWeaponInit30"},
+    {"name": "甲冑", "initDef": 60, "plusMax": 150, "rarity": 3, "baseMods": {}, "growthMods": {"DEF": 7}},
+    {"name": "漆黒の鎧", "initDef": 90, "plusMax": 15, "rarity": 5, "baseMods": {"HP": -20}, "growthMods": {"HP": -4, "DEF": 9}},
+    {"name": "忍装束", "initDef": 15, "plusMax": 100, "rarity": 3, "baseMods": {"EVA": 50}, "growthMods": {"DEF": 3, "EVA": 10}},
+    {"name": "黒霧の衣", "initDef": 45, "plusMax": 300, "rarity": 3, "baseMods": {"HP": -10}, "growthMods": {"HP": -1, "DEF": 5, "LUK": -1}},
+    {"name": "正宗紋の鎧", "initDef": 35, "plusMax": 500, "rarity": 3, "baseMods": {}, "growthMods": {"DEF": 4}},
+    {"name": "鉄の鎧", "initDef": 30, "plusMax": 15, "rarity": 1, "baseMods": {}, "growthMods": {}},
+    {"name": "銀の鎧", "initDef": 8, "plusMax": 15, "rarity": 3, "baseMods": {}, "growthMods": {}},
+    {"name": "金の鎧", "initDef": 6, "plusMax": 15, "rarity": 4, "baseMods": {}, "growthMods": {}},
+    {"name": "ダイヤの鎧", "initDef": 90, "plusMax": 15, "rarity": 5, "baseMods": {}, "growthMods": {"DEF": 5, "LUK": 3}},
+    {"name": "オニのパンツ", "initDef": 15, "plusMax": 15, "rarity": 4, "baseMods": {}, "growthMods": {"HP": 1, "DEF": 1}},
+    {"name": "菱餅大鎧", "initDef": 30, "plusMax": 15, "rarity": 4, "baseMods": {}, "growthMods": {"EVA": -1}},
+    {"name": "クッキーメイル", "initDef": 5, "plusMax": 15, "rarity": 4, "baseMods": {}, "growthMods": {}},
+    {"name": "端午の鎧", "initDef": 5, "plusMax": 55, "rarity": 4, "baseMods": {"HP": 5, "ATK": 5, "EVA": 5, "LUK": 5}, "growthMods": {"EVA": 5, "LUK": 5}},
+    {"name": "キッズマント", "initDef": 10, "plusMax": 15, "rarity": 4, "baseMods": {"EVA": 50}, "growthMods": {}},
+    {"name": "ターキーメイル", "initDef": 10, "plusMax": 15, "rarity": 4, "baseMods": {}, "growthMods": {"HP": 2, "EVA": 2}},
+    {"name": "アニバーサリーメイル", "initDef": 15, "plusMax": 200, "rarity": 4, "baseMods": {}, "growthMods": {}},
+    {"name": "セラミックメイル", "initDef": 150, "plusMax": 5, "rarity": 2, "baseMods": {}, "growthMods": {}}
+  ],
+  "items": [
+    {"name": "生命の木の葉", "initMods": {"HP": 10}, "growthMods": {}, "special": null},
+    {"name": "豪腕の木の葉", "initMods": {"ATK": 5}, "growthMods": {}, "special": null},
+    {"name": "守りの木の葉", "initMods": {"DEF": 5}, "growthMods": {}, "special": null},
+    {"name": "回避の木の葉", "initMods": {"EVA": 50}, "growthMods": {}, "special": null},
+    {"name": "運気の木の葉", "initMods": {"LUK": 3}, "growthMods": {}, "special": null},
+    {"name": "経験の木の葉", "initMods": {"LUK": 3, "EXP": 50}, "growthMods": {}, "special": null},
+    {"name": "生命の木の大葉", "initMods": {"HP": 100}, "growthMods": {}, "special": null},
+    {"name": "豪腕の木の大葉", "initMods": {"ATK": 50}, "growthMods": {}, "special": null},
+    {"name": "守りの木の大葉", "initMods": {"DEF": 30}, "growthMods": {}, "special": null},
+    {"name": "回避の木の大葉", "initMods": {"EVA": 200}, "growthMods": {}, "special": null},
+    {"name": "運気の木の大葉", "initMods": {"LUK": 30}, "growthMods": {}, "special": null},
+    {"name": "体力の木の大葉", "initMods": {"ATK": 50, "DEF": 15}, "growthMods": {}, "special": null},
+    {"name": "守護の木の大葉", "initMods": {"DEF": 15, "EVA": 50}, "growthMods": {}, "special": null},
+    {"name": "経験の木の大葉", "initMods": {"LUK": 3, "EXP": 100}, "growthMods": {}, "special": null},
+    {"name": "生命の木の実", "initMods": {}, "growthMods": {"HP": 5}, "special": null},
+    {"name": "豪腕の木の実", "initMods": {}, "growthMods": {"ATK": 2}, "special": null},
+    {"name": "守りの木の実", "initMods": {}, "growthMods": {"DEF": 2}, "special": null},
+    {"name": "回避の木の実", "initMods": {}, "growthMods": {"EVA": 5}, "special": null},
+    {"name": "運気の木の実", "initMods": {}, "growthMods": {"LUK": 1}, "special": null},
+    {"name": "体力の木の実", "initMods": {}, "growthMods": {"ATK": 2, "DEF": 1}, "special": null},
+    {"name": "守護の木の実", "initMods": {}, "growthMods": {"DEF": 1, "EVA": 2}, "special": null},
+    {"name": "生命の木の熟実", "initMods": {}, "growthMods": {"HP": 8}, "special": null},
+    {"name": "豪腕の木の熟実", "initMods": {}, "growthMods": {"ATK": 4}, "special": null},
+    {"name": "守りの木の熟実", "initMods": {}, "growthMods": {"DEF": 4}, "special": null},
+    {"name": "回避の木の熟実", "initMods": {}, "growthMods": {"EVA": 10}, "special": null},
+    {"name": "運気の木の熟実", "initMods": {}, "growthMods": {"LUK": 2}, "special": null},
+    {"name": "スタミナドリンク", "initMods": {"HP": 80}, "growthMods": {"HP": 5}, "special": null},
+    {"name": "ニンニク", "initMods": {"ATK": 15, "DEF": 10}, "growthMods": {"ATK": 2, "DEF": 1}, "special": null},
+    {"name": "力餅", "initMods": {}, "growthMods": {}, "special": "doubleWeaponInit"},
+    {"name": "桜餅", "initMods": {}, "growthMods": {"HP": 2, "ATK": 1, "DEF": 1, "EVA": 1, "LUK": 1}, "special": null}
+  ],
+  "criteria": [
+    {"id": "H1", "score": 5, "conditions": [{"level": 1, "stat": "HP", "threshold": 70}]},
+    {"id": "H2", "score": 7, "conditions": [{"level": 14, "stat": "HP", "threshold": 195}]},
+    {"id": "H3", "score": 7, "conditions": [{"level": 14, "stat": "HP", "threshold": 245}]},
+    {"id": "H4", "score": 5, "conditions": [{"level": 14, "stat": "HP", "threshold": 295}]},
+    {"id": "H5", "score": 2, "conditions": [{"level": 14, "stat": "HP", "threshold": 345}]},
+    {"id": "A1", "score": 5, "conditions": [{"level": 8, "stat": "ATK", "threshold": 102}, {"level": 12, "stat": "ATK", "threshold": 120}]},
+    {"id": "A2", "score": 10, "conditions": [{"level": 8, "stat": "ATK", "threshold": 123}, {"level": 12, "stat": "ATK", "threshold": 147}]},
+    {"id": "A3", "score": 5, "conditions": [{"level": 8, "stat": "ATK", "threshold": 138}, {"level": 12, "stat": "ATK", "threshold": 163}]},
+    {"id": "A4", "score": 10, "conditions": [{"level": 8, "stat": "ATK", "threshold": 165}, {"level": 12, "stat": "ATK", "threshold": 192}]},
+    {"id": "A5", "score": 7, "conditions": [{"level": 8, "stat": "ATK", "threshold": 196}, {"level": 12, "stat": "ATK", "threshold": 229}]},
+    {"id": "D1", "score": 10, "conditions": [{"level": 10, "stat": "DEF", "threshold": 219}]},
+    {"id": "D2", "score": 10, "conditions": [{"level": 14, "stat": "DEF", "threshold": 272}]},
+    {"id": "D3", "score": 7, "conditions": [{"level": 8, "stat": "DEF", "threshold": 219}]},
+    {"id": "D4", "score": 7, "conditions": [{"level": 12, "stat": "DEF", "threshold": 272}]},
+    {"id": "D5", "score": 2, "conditions": [{"level": 14, "stat": "DEF", "threshold": 321}]}
+  ]
+};
 
-DATA.items.unshift({ name: 'なし(装備しない)', initMods: {}, growthMods: {}, special: null });
-DATA.resonances = [{"weapon": "ナイトソード", "armor": "ナイトメイル", "name": "完全防御", "effect": "敵が攻撃をしたとき、ランダムでその攻撃を無効化する。確率1/2程度で発動。"}, {"weapon": "ヘビーソード", "armor": "ヘビーメイル", "name": "クリティカルアップ", "effect": "クリティカル攻撃率2倍"}, {"weapon": "バスターソード", "armor": "バスターメイル", "name": "生命アップ", "effect": "HP+30", "statEffect": {"type": "hp", "value": 30}}, {"weapon": "ミスリルソード", "armor": "ミスリルメイル", "name": "泉探し", "effect": "全ての泉の効果1.5倍"}, {"weapon": "幸運の剣", "armor": "幸運の鎧", "name": "宝探し", "effect": "通常宝箱の発見率が2倍となる。"}, {"weapon": "ドラゴンソード", "armor": "バスターメイル", "name": "ドラゴンバスター", "effect": "ドラゴンへの与ダメージ1.5倍"}, {"weapon": "ドラゴンソード", "armor": "ドラゴンアーマー", "name": "ドラゴン耐性", "effect": "ドラゴンからの被ダメ半減"}, {"weapon": "ディフェンダー", "armor": "オフェンサー", "name": "ステータスアップ", "effect": "武具の攻防が1.3倍になる。", "statEffect": {"type": "status_multiplier", "value": 1.3}}, {"weapon": "正宗", "armor": "正宗紋の鎧", "name": "白刃取り", "effect": "敵の一撃目の攻撃を完全に無効化する。"}, {"weapon": "プラチナソード", "armor": "プラチナメイル", "name": "ランダムアップ", "effect": "戦闘開始時に攻撃か防御のどちらかが20%上昇する。攻防比1:1。戦闘終了時に元へ戻る。確率1/2程度で発動。"}, {"weapon": "ブラッドソード", "armor": "ブラッドメイル", "name": "ドレイン", "effect": "攻撃時にライフを吸収する。確率1/5程度で発動。回復量は与ダメの10%。"}, {"weapon": "妖刀黒雫", "armor": "ダークメイル", "name": "一撃死", "effect": "ランダムで敵を即死させる。確率1/4程度で発動。"}, {"weapon": "妖刀黒雫", "armor": "黒霧の衣", "name": "居合い斬り", "effect": "1ターン目の勇者の攻撃が全てクリティカルになる。"}, {"weapon": "エンハンスソード", "armor": "エンハンスメイル", "name": "ピンチにクリティカル", "effect": "瀕死時にクリティカル攻撃率UP"}, {"weapon": "ルーンブレイド", "armor": "ルーンメイル", "name": "光探し", "effect": "聖なる光の効果が2倍"}, {"weapon": "クレイモア", "armor": "ハイランドメイル", "name": "毒耐性", "effect": "竜神の古都にて、青い毒草(防御成長率低下)を必ず無効化する。"}, {"weapon": "レイピア", "armor": "チェインメイル", "name": "防御力ダメージ", "effect": "敵に攻撃があたった場合、敵の防御力をさげる。"}, {"weapon": "ダンスソード", "armor": "身かわしの鎧", "name": "先制攻撃", "effect": "先制攻撃率UP"}, {"weapon": "ダンスソード", "armor": "身かわしの鎧", "name": "逃亡阻止", "effect": "敵が逃げにくくなる。"}, {"weapon": "水龍の剣", "armor": "バスターメイル", "name": "水龍バスター", "effect": "水龍への与ダメージ1.5倍"}, {"weapon": "水龍の剣", "armor": "龍鱗の鎧", "name": "水龍ドロップアップ", "effect": "水龍ドロップ率UP"}, {"weapon": "ダークブレイド", "armor": "ダークメイル", "name": "負ステータス耐性", "effect": "装備・アイテムが持つ負の基本値補正・負の成長値補正を打ち消して0にする。"}, {"weapon": "アークブレイド", "armor": "バスターメイル", "name": "アークドラゴンバスター", "effect": "アークドラゴンへの与ダメージ1.5倍"}, {"weapon": "アークブレイド", "armor": "アークメイル", "name": "アークドラゴンドロップアップ", "effect": "アークドラゴンのドロップ率UP"}, {"weapon": "竜神の剣", "armor": "バスターメイル", "name": "竜神バスター", "effect": "竜神の怨念への与ダメージ1.5倍"}, {"weapon": "竜神の剣", "armor": "龍鱗の鎧", "name": "龍神ドロップアップ", "effect": "竜神の怨念のドロップ率UP"}, {"weapon": "光輝の剣", "armor": "太陽の鎧", "name": "瀕死時に回復", "effect": "瀕死時一度だけ全回復、HP20%以下で発動する。"}, {"weapon": "漆黒の剣", "armor": "漆黒の鎧", "name": "闇の空", "effect": "特定敵の出現時間制限を解除。"}, {"weapon": "くない", "armor": "忍装束", "name": "3連続攻撃", "effect": "通常攻撃に加え、敵の行動前に2回追加攻撃する。攻撃1回あたりの与ダメは本来の1/3程になる。"}, {"weapon": "鉄のナイフ", "armor": "鉄の鎧", "name": "連続攻撃(微)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の50%程になる。"}, {"weapon": "銀のナイフ", "armor": "銀の鎧", "name": "連続攻撃(弱)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の55%程になる。"}, {"weapon": "金のナイフ", "armor": "金の鎧", "name": "連続攻撃(中)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の60%程になる。"}, {"weapon": "ダイヤのナイフ", "armor": "ダイヤの鎧", "name": "連続攻撃(強)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の65%程になる。"}, {"weapon": "鉄の剣", "armor": "甲冑", "name": "城守", "effect": "漆黒の古城で受けるダメージを25%減少する。"}, {"weapon": "鉄の剣", "armor": "鉄の鎧", "name": "運アップ(微)", "effect": "運の初期補正が10UP", "statEffect": {"type": "luk", "value": 10}}, {"weapon": "銀の剣", "armor": "銀の鎧", "name": "運アップ(弱)", "effect": "運の初期補正が20UP", "statEffect": {"type": "luk", "value": 20}}, {"weapon": "金の剣", "armor": "金の鎧", "name": "運アップ(中)", "effect": "運の初期補正が30UP", "statEffect": {"type": "luk", "value": 30}}, {"weapon": "ダイヤの剣", "armor": "ダイヤの鎧", "name": "運アップ(強)", "effect": "運の初期補正が40UP", "statEffect": {"type": "luk", "value": 40}}, {"weapon": "鉄の斧", "armor": "鉄の鎧", "name": "金貨泥棒(弱)", "effect": "攻撃時、金貨を入手。確率1%程度で発動。金貨とは別に強化鉱20を入手することもある。"}, {"weapon": "銀の斧", "armor": "銀の鎧", "name": "金貨泥棒(中)", "effect": "攻撃時、金貨を入手。確率2%程度で発動。"}, {"weapon": "金の斧", "armor": "金の鎧", "name": "金貨泥棒(強)", "effect": "攻撃時、金貨を入手。確率3%程度で発動。"}, {"weapon": "チョコバー", "armor": "クッキーメイル", "name": "敵寄せ(強)", "effect": "敵とのエンカウント率がUP。敵寄せ(弱)+敵寄せ(強)で1.3倍程度になる。"}, {"weapon": "桜橘の刀", "armor": "菱餅大鎧", "name": "硬化", "effect": "敵の攻撃をくらうと防御力が上がるが、ターン経過ごとに攻撃力が下がる。戦闘終了時に元に戻る。"}, {"weapon": "粋夏の刀", "armor": "太陽の鎧", "name": "目くらまし", "effect": "敵が攻撃をしたとき、ランダムでその攻撃を無効化する。確率1/3程度で発動。"}, {"weapon": "粽大刀", "armor": "端午の鎧", "name": "端午", "effect": "現在HPの下一桁が5になった場合、攻撃力または防御力が5上昇する。攻防比1:1。"}, {"weapon": "アニバーサリーソード", "armor": "アニバーサリーメイル", "name": "超記念効果", "effect": "記念効果の効果が前後1分まで拡大する。"}, {"weapon": "セラミックソード", "armor": "セラミックメイル", "name": "基本値アップ", "effect": "攻撃と防御の出発時補正値+30", "statEffect": {"type": "atkdef_init", "value": 30}}];
+DATA.items.unshift({ name: 'なし', initMods: {}, growthMods: {}, special: null });
+DATA.resonances = [
+  {"weapon": "ナイトソード", "armor": "ナイトメイル", "name": "完全防御", "effect": "敵が攻撃をしたとき、ランダムでその攻撃を無効化する。確率1/2程度で発動。"},
+  {"weapon": "ヘビーソード", "armor": "ヘビーメイル", "name": "クリティカルアップ", "effect": "クリティカル攻撃率2倍"},
+  {"weapon": "バスターソード", "armor": "バスターメイル", "name": "生命アップ", "effect": "HP+30", "statEffect": {"type": "hp", "value": 30}},
+  {"weapon": "ミスリルソード", "armor": "ミスリルメイル", "name": "泉探し", "effect": "全ての泉の効果1.5倍"},
+  {"weapon": "幸運の剣", "armor": "幸運の鎧", "name": "宝探し", "effect": "通常宝箱の発見率が2倍となる。"},
+  {"weapon": "ドラゴンソード", "armor": "バスターメイル", "name": "ドラゴンバスター", "effect": "ドラゴンへの与ダメージ1.5倍"},
+  {"weapon": "ドラゴンソード", "armor": "ドラゴンアーマー", "name": "ドラゴン耐性", "effect": "ドラゴンからの被ダメ半減"},
+  {"weapon": "ディフェンダー", "armor": "オフェンサー", "name": "ステータスアップ", "effect": "武具の攻防が1.3倍になる。", "statEffect": {"type": "status_multiplier", "value": 1.3}},
+  {"weapon": "正宗", "armor": "正宗紋の鎧", "name": "白刃取り", "effect": "敵の一撃目の攻撃を完全に無効化する。"},
+  {"weapon": "プラチナソード", "armor": "プラチナメイル", "name": "ランダムアップ", "effect": "戦闘開始時に攻撃か防御のどちらかが20%上昇する。攻防比1:1。戦闘終了時に元へ戻る。確率1/2程度で発動。"},
+  {"weapon": "ブラッドソード", "armor": "ブラッドメイル", "name": "ドレイン", "effect": "攻撃時にライフを吸収する。確率1/5程度で発動。回復量は与ダメの10%。"},
+  {"weapon": "妖刀黒雫", "armor": "ダークメイル", "name": "一撃死", "effect": "ランダムで敵を即死させる。確率1/4程度で発動。"},
+  {"weapon": "妖刀黒雫", "armor": "黒霧の衣", "name": "居合い斬り", "effect": "1ターン目の勇者の攻撃が全てクリティカルになる。"},
+  {"weapon": "エンハンスソード", "armor": "エンハンスメイル", "name": "ピンチにクリティカル", "effect": "瀕死時にクリティカル攻撃率UP"},
+  {"weapon": "ルーンブレイド", "armor": "ルーンメイル", "name": "光探し", "effect": "聖なる光の効果が2倍"},
+  {"weapon": "クレイモア", "armor": "ハイランドメイル", "name": "毒耐性", "effect": "竜神の古都にて、青い毒草(防御成長率低下)を必ず無効化する。"},
+  {"weapon": "レイピア", "armor": "チェインメイル", "name": "防御力ダメージ", "effect": "敵に攻撃があたった場合、敵の防御力をさげる。"},
+  {"weapon": "ダンスソード", "armor": "身かわしの鎧", "name": "先制攻撃", "effect": "先制攻撃率UP"},
+  {"weapon": "ダンスソード", "armor": "身かわしの鎧", "name": "逃亡阻止", "effect": "敵が逃げにくくなる。"},
+  {"weapon": "水龍の剣", "armor": "バスターメイル", "name": "水龍バスター", "effect": "水龍への与ダメージ1.5倍"},
+  {"weapon": "水龍の剣", "armor": "龍鱗の鎧", "name": "水龍ドロップアップ", "effect": "水龍ドロップ率UP"},
+  {"weapon": "ダークブレイド", "armor": "ダークメイル", "name": "負ステータス耐性", "effect": "装備・アイテムが持つ負の基本値補正・負の成長値補正を打ち消して0にする。"},
+  {"weapon": "アークブレイド", "armor": "バスターメイル", "name": "アークドラゴンバスター", "effect": "アークドラゴンへの与ダメージ1.5倍"},
+  {"weapon": "アークブレイド", "armor": "アークメイル", "name": "アークドラゴンドロップアップ", "effect": "アークドラゴンのドロップ率UP"},
+  {"weapon": "竜神の剣", "armor": "バスターメイル", "name": "竜神バスター", "effect": "竜神の怨念への与ダメージ1.5倍"},
+  {"weapon": "竜神の剣", "armor": "龍鱗の鎧", "name": "龍神ドロップアップ", "effect": "竜神の怨念のドロップ率UP"},
+  {"weapon": "光輝の剣", "armor": "太陽の鎧", "name": "瀕死時に回復", "effect": "瀕死時一度だけ全回復、HP20%以下で発動する。"},
+  {"weapon": "漆黒の剣", "armor": "漆黒の鎧", "name": "闇の空", "effect": "特定敵の出現時間制限を解除。"},
+  {"weapon": "くない", "armor": "忍装束", "name": "3連続攻撃", "effect": "通常攻撃に加え、敵の行動前に2回追加攻撃する。攻撃1回あたりの与ダメは本来の1/3程になる。"},
+  {"weapon": "鉄のナイフ", "armor": "鉄の鎧", "name": "連続攻撃(微)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の50%程になる。"},
+  {"weapon": "銀のナイフ", "armor": "銀の鎧", "name": "連続攻撃(弱)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の55%程になる。"},
+  {"weapon": "金のナイフ", "armor": "金の鎧", "name": "連続攻撃(中)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の60%程になる。"},
+  {"weapon": "ダイヤのナイフ", "armor": "ダイヤの鎧", "name": "連続攻撃(強)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の65%程になる。"},
+  {"weapon": "鉄の剣", "armor": "甲冑", "name": "城守", "effect": "漆黒の古城で受けるダメージを25%減少する。"},
+  {"weapon": "鉄の剣", "armor": "鉄の鎧", "name": "運アップ(微)", "effect": "運の初期補正が10UP", "statEffect": {"type": "luk", "value": 10}},
+  {"weapon": "銀の剣", "armor": "銀の鎧", "name": "運アップ(弱)", "effect": "運の初期補正が20UP", "statEffect": {"type": "luk", "value": 20}},
+  {"weapon": "金の剣", "armor": "金の鎧", "name": "運アップ(中)", "effect": "運の初期補正が30UP", "statEffect": {"type": "luk", "value": 30}},
+  {"weapon": "ダイヤの剣", "armor": "ダイヤの鎧", "name": "運アップ(強)", "effect": "運の初期補正が40UP", "statEffect": {"type": "luk", "value": 40}},
+  {"weapon": "鉄の斧", "armor": "鉄の鎧", "name": "金貨泥棒(弱)", "effect": "攻撃時、金貨を入手。確率1%程度で発動。金貨とは別に強化鉱20を入手することもある。"},
+  {"weapon": "銀の斧", "armor": "銀の鎧", "name": "金貨泥棒(中)", "effect": "攻撃時、金貨を入手。確率2%程度で発動。"},
+  {"weapon": "金の斧", "armor": "金の鎧", "name": "金貨泥棒(強)", "effect": "攻撃時、金貨を入手。確率3%程度で発動。"},
+  {"weapon": "チョコバー", "armor": "クッキーメイル", "name": "敵寄せ(強)", "effect": "敵とのエンカウント率がUP。敵寄せ(弱)+敵寄せ(強)で1.3倍程度になる。"},
+  {"weapon": "桜橘の刀", "armor": "菱餅大鎧", "name": "硬化", "effect": "敵の攻撃をくらうと防御力が上がるが、ターン経過ごとに攻撃力が下がる。戦闘終了時に元に戻る。"},
+  {"weapon": "粋夏の刀", "armor": "太陽の鎧", "name": "目くらまし", "effect": "敵が攻撃をしたとき、ランダムでその攻撃を無効化する。確率1/3程度で発動。"},
+  {"weapon": "粽大刀", "armor": "端午の鎧", "name": "端午", "effect": "現在HPの下一桁が5になった場合、攻撃力または防御力が5上昇する。攻防比1:1。"},
+  {"weapon": "アニバーサリーソード", "armor": "アニバーサリーメイル", "name": "超記念効果", "effect": "記念効果の効果が前後1分まで拡大する。"},
+  {"weapon": "セラミックソード", "armor": "セラミックメイル", "name": "基本値アップ", "effect": "攻撃と防御の出発時補正値+30", "statEffect": {"type": "atkdef_init", "value": 30}}
+];
 
 const STAT_LABEL = {HP:'HP', ATK:'攻撃', DEF:'防御', EVA:'回避', LUK:'運'};
 const STATS = ['HP','ATK','DEF','EVA','LUK'];
@@ -535,21 +761,23 @@ function mergeDictMax(a, b){
   return out;
 }
 
-const NONE_WEAPON = { name: 'なし', initAtk: 0, plusMax: 0, baseMods: {}, growthMods: {} };
-const NONE_ARMOR = { name: 'なし', initDef: 0, plusMax: 0, baseMods: {}, growthMods: {} };
+const NONE_WEAPON = { name: 'なし', initAtk: 0, plusMax: 0, rarity: 0, baseMods: {}, growthMods: {} };
+const NONE_ARMOR = { name: 'なし', initDef: 0, plusMax: 0, rarity: 0, baseMods: {}, growthMods: {} };
 
 function getMergedWeapon(){
   const idxs = getSelectedWeaponIndices();
   if (idxs.length === 0) return NONE_WEAPON;
   if (idxs.length === 1){
     const w = DATA.weapons[idxs[0]];
-    return { name: w.name, initAtk: w.initAtk, plusMax: w.plusMax, baseMods: w.baseMods, growthMods: w.growthMods };
+    return { name: w.name, initAtk: w.initAtk, plusMax: w.plusMax, rarity: w.rarity, baseMods: w.baseMods, growthMods: w.growthMods };
   }
   const w1 = DATA.weapons[idxs[0]], w2 = DATA.weapons[idxs[1]];
+  const sumRarity = w1.rarity + w2.rarity;
   return {
-    name: `${w1.name} + ${w2.name}(合成)`,
+    name: `${w1.name} + ${w2.name} (合成鉱${sumRarity})`,
     initAtk: Math.max(w1.initAtk, w2.initAtk),
     plusMax: Math.ceil((w1.plusMax + w2.plusMax) / 2),
+    rarity: sumRarity,
     baseMods: mergeDictMax(w1.baseMods, w2.baseMods),
     growthMods: mergeDictMax(w1.growthMods, w2.growthMods),
   };
@@ -560,13 +788,15 @@ function getMergedArmor(){
   if (idxs.length === 0) return NONE_ARMOR;
   if (idxs.length === 1){
     const a = DATA.armors[idxs[0]];
-    return { name: a.name, initDef: a.initDef, plusMax: a.plusMax, baseMods: a.baseMods, growthMods: a.growthMods };
+    return { name: a.name, initDef: a.initDef, plusMax: a.plusMax, rarity: a.rarity, baseMods: a.baseMods, growthMods: a.growthMods };
   }
   const a1 = DATA.armors[idxs[0]], a2 = DATA.armors[idxs[1]];
+  const sumRarity = a1.rarity + a2.rarity;
   return {
-    name: `${a1.name} + ${a2.name}(合成)`,
+    name: `${a1.name} + ${a2.name} (合成鉱${sumRarity})`,
     initDef: Math.max(a1.initDef, a2.initDef),
     plusMax: Math.ceil((a1.plusMax + a2.plusMax) / 2),
+    rarity: sumRarity,
     baseMods: mergeDictMax(a1.baseMods, a2.baseMods),
     growthMods: mergeDictMax(a1.growthMods, a2.growthMods),
   };
@@ -742,17 +972,17 @@ function populatePrimarySelect(sel, list, mapLabel, noneLabel){
   let html = `<option value="-1">${noneLabel}</option>`;
   html += list.map((it, i) => `<option value="${i}">${mapLabel(it)}</option>`).join('');
   sel.innerHTML = html;
-  sel.value = '0';
+  sel.value = '-1';
 }
 
-populatePrimarySelect(els.weaponSel, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax})`, 'なし(武器を装備しない)');
-populatePrimarySelect(els.armorSel, DATA.armors, a => `${a.name}(初期${a.initDef}/上限+${a.plusMax})`, 'なし(防具を装備しない)');
+populatePrimarySelect(els.weaponSel, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax}/★${w.rarity})`, 'なし');
+populatePrimarySelect(els.armorSel, DATA.armors, a => `${a.name}(初期${a.initDef}/上限+${a.plusMax}/★${a.rarity})`, 'なし');
 populateSelect(els.item1Sel, DATA.items, it => it.name);
 populateSelect(els.item2Sel, DATA.items, it => it.name);
 
 function populateSynthSelect(sel, list, mapLabel, excludeIndex){
   const prev = sel.value === '' ? '-1' : sel.value;
-  let html = '<option value="-1">なし(合成しない)</option>';
+  let html = '<option value="-1">なし</option>';
   list.forEach((it, i) => {
     if (i === excludeIndex) return;
     html += `<option value="${i}">${mapLabel(it)}</option>`;
@@ -763,8 +993,8 @@ function populateSynthSelect(sel, list, mapLabel, excludeIndex){
 }
 
 function refreshSynthSelects(){
-  populateSynthSelect(els.weaponSel2, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax})`, +els.weaponSel.value);
-  populateSynthSelect(els.armorSel2, DATA.armors, a => `${a.name}(初期${a.initDef}/上限+${a.plusMax})`, +els.armorSel.value);
+  populateSynthSelect(els.weaponSel2, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax}/★${w.rarity})`, +els.weaponSel.value);
+  populateSynthSelect(els.armorSel2, DATA.armors, a => `${a.name}(初期${a.initDef}/上限+${a.plusMax}/★${a.rarity})`, +els.armorSel.value);
 }
 refreshSynthSelects();
 
@@ -882,26 +1112,86 @@ els.armorPlusInput.addEventListener('blur', () => { els.armorPlusInput.value = e
   });
 })();
 
+// 武器の探索用候補（単体＆レア度合計7以下の2種合成）
 function getWeaponSearchCandidates(){
   const i1 = +els.weaponSel.value;
   if (i1 === -1){
-    return DATA.weapons.map((w, i) => ({
-      obj: { name: w.name, initAtk: w.initAtk, plusMax: w.plusMax, baseMods: w.baseMods, growthMods: w.growthMods },
-      plus: w.plusMax,
-      idxs: [i],
-    }));
+    const cands = [];
+    const n = DATA.weapons.length;
+    // 1. 単体武器
+    for (let i = 0; i < n; i++){
+      const w = DATA.weapons[i];
+      cands.push({
+        obj: { name: w.name, initAtk: w.initAtk, plusMax: w.plusMax, rarity: w.rarity, baseMods: w.baseMods, growthMods: w.growthMods },
+        plus: w.plusMax,
+        idxs: [i]
+      });
+    }
+    // 2. 合成武器（レア度合計 <= 7）
+    for (let i = 0; i < n; i++){
+      for (let j = i + 1; j < n; j++){
+        const w1 = DATA.weapons[i];
+        const w2 = DATA.weapons[j];
+        const sumRarity = w1.rarity + w2.rarity;
+        if (sumRarity <= 7){
+          cands.push({
+            obj: {
+              name: `${w1.name} + ${w2.name} (合成鉱${sumRarity})`,
+              initAtk: Math.max(w1.initAtk, w2.initAtk),
+              plusMax: Math.ceil((w1.plusMax + w2.plusMax) / 2),
+              rarity: sumRarity,
+              baseMods: mergeDictMax(w1.baseMods, w2.baseMods),
+              growthMods: mergeDictMax(w1.growthMods, w2.growthMods),
+            },
+            plus: Math.ceil((w1.plusMax + w2.plusMax) / 2),
+            idxs: [i, j]
+          });
+        }
+      }
+    }
+    return cands;
   }
   return [{ obj: getMergedWeapon(), plus: +els.weaponPlus.value, idxs: getSelectedWeaponIndices() }];
 }
 
+// 防具の探索用候補（単体＆レア度合計7以下の2種合成）
 function getArmorSearchCandidates(){
   const i1 = +els.armorSel.value;
   if (i1 === -1){
-    return DATA.armors.map((a, i) => ({
-      obj: { name: a.name, initDef: a.initDef, plusMax: a.plusMax, baseMods: a.baseMods, growthMods: a.growthMods },
-      plus: a.plusMax,
-      idxs: [i],
-    }));
+    const cands = [];
+    const n = DATA.armors.length;
+    // 1. 単体防具
+    for (let i = 0; i < n; i++){
+      const a = DATA.armors[i];
+      cands.push({
+        obj: { name: a.name, initDef: a.initDef, plusMax: a.plusMax, rarity: a.rarity, baseMods: a.baseMods, growthMods: a.growthMods },
+        plus: a.plusMax,
+        idxs: [i]
+      });
+    }
+    // 2. 合成防具（レア度合計 <= 7）
+    for (let i = 0; i < n; i++){
+      for (let j = i + 1; j < n; j++){
+        const a1 = DATA.armors[i];
+        const a2 = DATA.armors[j];
+        const sumRarity = a1.rarity + a2.rarity;
+        if (sumRarity <= 7){
+          cands.push({
+            obj: {
+              name: `${a1.name} + ${a2.name} (合成鉱${sumRarity})`,
+              initDef: Math.max(a1.initDef, a2.initDef),
+              plusMax: Math.ceil((a1.plusMax + a2.plusMax) / 2),
+              rarity: sumRarity,
+              baseMods: mergeDictMax(a1.baseMods, a2.baseMods),
+              growthMods: mergeDictMax(a1.growthMods, a2.growthMods),
+            },
+            plus: Math.ceil((a1.plusMax + a2.plusMax) / 2),
+            idxs: [i, j]
+          });
+        }
+      }
+    }
+    return cands;
   }
   return [{ obj: getMergedArmor(), plus: +els.armorPlus.value, idxs: getSelectedArmorIndices() }];
 }
