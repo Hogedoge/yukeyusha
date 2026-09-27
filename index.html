@@ -6,7 +6,7 @@
 <title>ゆけ！勇者 - ステータス計算機</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 <style>
 :root{
   box-sizing: border-box;
@@ -70,33 +70,24 @@ body{
 .wrap{
   max-width: 1180px;
   margin: 0 auto;
-  padding: 28px 20px 80px;
+  padding: 16px 20px 60px;
 }
 header.top{
   display:flex;
-  align-items:baseline;
+  align-items:center;
   justify-content:space-between;
   gap:16px;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   border-bottom: 1px solid var(--line);
-  padding-bottom: 18px;
+  padding-bottom: 10px;
 }
 h1{
   font-family: 'Shippori Mincho', serif;
   font-weight: 700;
-  font-size: clamp(22px, 4vw, 32px);
+  font-size: clamp(20px, 3.5vw, 28px);
   margin: 0;
   letter-spacing: .04em;
   color: var(--gold);
-}
-h1 small{
-  display:block;
-  font-family: -apple-system, sans-serif;
-  font-weight: 400;
-  font-size: 13px;
-  color: var(--ink-dim);
-  letter-spacing: .1em;
-  margin-top: 4px;
 }
 .theme-toggle{
   background: none;
@@ -178,6 +169,9 @@ select, input[type=number]{
   border-radius: 6px;
   font-size: 14.5px;
   font-family: inherit;
+}
+select + select {
+  margin-top: 8px;
 }
 select:focus, input:focus{ outline: 2px solid var(--gold-soft); outline-offset: 1px; }
 
@@ -389,89 +383,6 @@ button.run:hover{ background: var(--gold-soft); }
 @media (max-width: 860px){
   .mobile-score-badge{ display:block; }
 }
-
-.data-editor{ margin-top: 22px; }
-.data-editor summary{
-  cursor: pointer;
-  font-family: 'Shippori Mincho', serif;
-  font-size: 15px;
-  color: var(--gold);
-  outline: none;
-}
-.data-editor summary::-webkit-details-marker{ color: var(--gold); }
-.editor-grid{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 14px;
-}
-@media (max-width: 900px){
-  .editor-grid{ grid-template-columns: 1fr; }
-}
-.editor-col-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom: 6px;
-}
-.editor-col textarea{
-  width: 100%;
-  height: 260px;
-  background: var(--bg-panel-raised);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  font-family: var(--mono);
-  font-size: 11.5px;
-  line-height: 1.5;
-  border-radius: 6px;
-  padding: 8px;
-  resize: vertical;
-}
-.mini-btn{
-  background: none;
-  border: 1px solid var(--line);
-  color: var(--ink-dim);
-  border-radius: 6px;
-  padding: 3px 10px;
-  font-size: 11.5px;
-  cursor: pointer;
-}
-.mini-btn:hover{ border-color: var(--gold-soft); color: var(--gold); }
-
-.form-grid{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.form-grid.stat5{ grid-template-columns: repeat(5, 1fr); }
-.form-grid .field{ margin-bottom: 0; }
-.form-grid .field label{ font-size: 11px; }
-.form-grid input{ padding: 7px 8px; font-size: 13px; }
-.editor-add-grid{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-bottom: 22px;
-}
-@media (max-width: 900px){
-  .editor-add-grid{ grid-template-columns: 1fr; }
-  .form-grid, .form-grid.stat5{ grid-template-columns: repeat(2, 1fr); }
-}
-.editor-add-col{
-  background: var(--bg-panel-raised);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px;
-}
-.add-btn{
-  width: 100%;
-  padding: 8px;
-  font-size: 13px;
-  border-color: var(--gold-soft);
-  color: var(--gold);
-  margin-top: 4px;
-}
 </style>
 </head>
 <body>
@@ -481,11 +392,11 @@ button.run:hover{ background: var(--gold-soft); }
 </div>
 <div class="wrap">
   <header class="top">
-    <h1>ゆけ！勇者<small>成長予測・採点計算</small></h1>
+    <h1>ゆけ！勇者</h1>
     <button class="theme-toggle" id="themeToggle" type="button">表示切替</button>
   </header>
 
-    <div class="grid">
+  <div class="grid">
     <div>
       <div class="panel">
         <h2>装備選択</h2>
@@ -494,7 +405,7 @@ button.run:hover{ background: var(--gold-soft); }
           <select id="weaponSel"></select>
         </div>
         <div class="field">
-          <label for="weaponSel2">武器2(合成・任意)</label>
+          <label for="weaponSel2">武器2</label>
           <select id="weaponSel2"></select>
         </div>
         <div class="field">
@@ -509,7 +420,7 @@ button.run:hover{ background: var(--gold-soft); }
           <select id="armorSel"></select>
         </div>
         <div class="field">
-          <label for="armorSel2">防具2(合成・任意)</label>
+          <label for="armorSel2">防具2</label>
           <select id="armorSel2"></select>
         </div>
         <div class="field">
@@ -520,11 +431,8 @@ button.run:hover{ background: var(--gold-soft); }
           </div>
         </div>
         <div class="field">
-          <label for="item1Sel">アイテム1</label>
+          <label for="item1Sel">アイテム</label>
           <select id="item1Sel"></select>
-        </div>
-        <div class="field">
-          <label for="item2Sel">アイテム2</label>
           <select id="item2Sel"></select>
         </div>
       </div>
@@ -586,120 +494,6 @@ button.run:hover{ background: var(--gold-soft); }
       </div>
     </div>
   </div>
-
-  <details class="panel data-editor">
-    <summary>データ管理(武器・防具・アイテムの追加/編集/削除)</summary>
-    <p class="opt-note" style="margin-top:10px;">下のフォームに入力して各「追加」ボタンを押すと、その武器・防具・アイテムがその場でツールに追加されます(このブラウザだけの一時的な変更です。恒久的に残したい場合は下のJSONをコピーして控えておいてください)。</p>
-
-    <div class="editor-add-grid">
-      <div class="editor-add-col">
-        <h3 class="sub-h">武器を追加</h3>
-        <div class="form-grid">
-          <div class="field"><label>名前</label><input type="text" id="wAddName"></div>
-          <div class="field"><label>初期値(攻撃)</label><input type="number" id="wAddInit" value="0"></div>
-          <div class="field"><label>強化値上限</label><input type="number" id="wAddPlusMax" value="0"></div>
-        </div>
-        <p class="opt-note">基本値(HP・防・回・運に加算、空欄は0)</p>
-        <div class="form-grid stat5">
-          <div class="field"><label>HP</label><input type="number" id="wAddBaseHP"></div>
-          <div class="field"><label>防御</label><input type="number" id="wAddBaseDEF"></div>
-          <div class="field"><label>回避</label><input type="number" id="wAddBaseEVA"></div>
-          <div class="field"><label>運</label><input type="number" id="wAddBaseLUK"></div>
-        </div>
-        <p class="opt-note">成長補正(空欄は0)</p>
-        <div class="form-grid stat5">
-          <div class="field"><label>HP</label><input type="number" id="wAddGrowHP"></div>
-          <div class="field"><label>攻撃</label><input type="number" id="wAddGrowATK"></div>
-          <div class="field"><label>防御</label><input type="number" id="wAddGrowDEF"></div>
-          <div class="field"><label>回避</label><input type="number" id="wAddGrowEVA"></div>
-          <div class="field"><label>運</label><input type="number" id="wAddGrowLUK"></div>
-        </div>
-        <button class="mini-btn add-btn" id="addWeaponBtn" type="button">＋ 武器を追加</button>
-      </div>
-
-      <div class="editor-add-col">
-        <h3 class="sub-h">防具を追加</h3>
-        <div class="form-grid">
-          <div class="field"><label>名前</label><input type="text" id="aAddName"></div>
-          <div class="field"><label>初期値(防御)</label><input type="number" id="aAddInit" value="0"></div>
-          <div class="field"><label>強化値上限</label><input type="number" id="aAddPlusMax" value="0"></div>
-        </div>
-        <p class="opt-note">基本値(HP・攻・回・運に加算、空欄は0)</p>
-        <div class="form-grid stat5">
-          <div class="field"><label>HP</label><input type="number" id="aAddBaseHP"></div>
-          <div class="field"><label>攻撃</label><input type="number" id="aAddBaseATK"></div>
-          <div class="field"><label>回避</label><input type="number" id="aAddBaseEVA"></div>
-          <div class="field"><label>運</label><input type="number" id="aAddBaseLUK"></div>
-        </div>
-        <p class="opt-note">成長補正(空欄は0)</p>
-        <div class="form-grid stat5">
-          <div class="field"><label>HP</label><input type="number" id="aAddGrowHP"></div>
-          <div class="field"><label>攻撃</label><input type="number" id="aAddGrowATK"></div>
-          <div class="field"><label>防御</label><input type="number" id="aAddGrowDEF"></div>
-          <div class="field"><label>回避</label><input type="number" id="aAddGrowEVA"></div>
-          <div class="field"><label>運</label><input type="number" id="aAddGrowLUK"></div>
-        </div>
-        <button class="mini-btn add-btn" id="addArmorBtn" type="button">＋ 防具を追加</button>
-      </div>
-
-      <div class="editor-add-col">
-        <h3 class="sub-h">アイテムを追加</h3>
-        <div class="form-grid">
-          <div class="field" style="grid-column:1/3;"><label>名前</label><input type="text" id="iAddName"></div>
-          <div class="field"><label>特殊効果</label>
-            <select id="iAddSpecial">
-              <option value="">なし</option>
-              <option value="doubleWeaponInit">武器初期値を2倍(力餅相当)</option>
-            </select>
-          </div>
-        </div>
-        <p class="opt-note">初期値に加算(空欄は0、経験値ボーナスはEXP)</p>
-        <div class="form-grid stat5">
-          <div class="field"><label>HP</label><input type="number" id="iAddInitHP"></div>
-          <div class="field"><label>攻撃</label><input type="number" id="iAddInitATK"></div>
-          <div class="field"><label>防御</label><input type="number" id="iAddInitDEF"></div>
-          <div class="field"><label>回避</label><input type="number" id="iAddInitEVA"></div>
-          <div class="field"><label>運</label><input type="number" id="iAddInitLUK"></div>
-        </div>
-        <div class="form-grid">
-          <div class="field"><label>経験値(EXP)</label><input type="number" id="iAddInitEXP"></div>
-        </div>
-        <p class="opt-note">成長補正に加算(空欄は0)</p>
-        <div class="form-grid stat5">
-          <div class="field"><label>HP</label><input type="number" id="iAddGrowHP"></div>
-          <div class="field"><label>攻撃</label><input type="number" id="iAddGrowATK"></div>
-          <div class="field"><label>防御</label><input type="number" id="iAddGrowDEF"></div>
-          <div class="field"><label>回避</label><input type="number" id="iAddGrowEVA"></div>
-          <div class="field"><label>運</label><input type="number" id="iAddGrowLUK"></div>
-        </div>
-        <button class="mini-btn add-btn" id="addItemBtn" type="button">＋ アイテムを追加</button>
-      </div>
-    </div>
-    <div class="opt-note" id="addFormStatus" style="margin-bottom:14px;"></div>
-
-    <p class="opt-note" style="margin-top:0;">以下はフォームで追加した内容も反映される、全データのJSON表示です。まとめての編集や削除、数値の微調整はこちらから直接行えます。</p>
-    <div class="editor-grid">
-      <div class="editor-col">
-        <div class="editor-col-head"><h3 class="sub-h">武器(weapons)</h3><button class="mini-btn" data-copy="weaponsJson" type="button">コピー</button></div>
-        <textarea id="weaponsJson" spellcheck="false"></textarea>
-      </div>
-      <div class="editor-col">
-        <div class="editor-col-head"><h3 class="sub-h">防具(armors)</h3><button class="mini-btn" data-copy="armorsJson" type="button">コピー</button></div>
-        <textarea id="armorsJson" spellcheck="false"></textarea>
-      </div>
-      <div class="editor-col">
-        <div class="editor-col-head"><h3 class="sub-h">アイテム(items)</h3><button class="mini-btn" data-copy="itemsJson" type="button">コピー</button></div>
-        <textarea id="itemsJson" spellcheck="false"></textarea>
-      </div>
-    </div>
-    <div class="opt-controls" style="margin-top:14px;">
-      <button class="run" id="applyDataBtn" type="button">変更を反映</button>
-      <span class="opt-note" id="dataEditorStatus"></span>
-    </div>
-    <p class="opt-note" style="margin-top:10px;">
-      各項目の意味: <b>initAtk/initDef</b>=初期値、<b>plusMax</b>=強化値の上限、<b>baseMods</b>=基本値(武器はHP・防・回・運/防具はHP・攻・回・運に加算)、<b>growthMods</b>=成長補正(HP・攻・防・回・運に加算)。アイテムは<b>initMods</b>(初期値に加算、経験値ボーナスは<code>EXP</code>)と<b>growthMods</b>(成長補正に加算)。値がない項目は書かなくてOKです(例: <code>&#123;&#125;</code>)。
-    </p>
-  </details>
 </div>
 
 <script>
@@ -708,12 +502,10 @@ const DATA = {"baseStats": {"HP": 30, "ATK": 5, "DEF": 5, "EVA": 5, "LUK": 5}, "
 DATA.items.unshift({ name: 'なし(装備しない)', initMods: {}, growthMods: {}, special: null });
 DATA.resonances = [{"weapon": "ナイトソード", "armor": "ナイトメイル", "name": "完全防御", "effect": "敵が攻撃をしたとき、ランダムでその攻撃を無効化する。確率1/2程度で発動。"}, {"weapon": "ヘビーソード", "armor": "ヘビーメイル", "name": "クリティカルアップ", "effect": "クリティカル攻撃率2倍"}, {"weapon": "バスターソード", "armor": "バスターメイル", "name": "生命アップ", "effect": "HP+30", "statEffect": {"type": "hp", "value": 30}}, {"weapon": "ミスリルソード", "armor": "ミスリルメイル", "name": "泉探し", "effect": "全ての泉の効果1.5倍"}, {"weapon": "幸運の剣", "armor": "幸運の鎧", "name": "宝探し", "effect": "通常宝箱の発見率が2倍となる。"}, {"weapon": "ドラゴンソード", "armor": "バスターメイル", "name": "ドラゴンバスター", "effect": "ドラゴンへの与ダメージ1.5倍"}, {"weapon": "ドラゴンソード", "armor": "ドラゴンアーマー", "name": "ドラゴン耐性", "effect": "ドラゴンからの被ダメ半減"}, {"weapon": "ディフェンダー", "armor": "オフェンサー", "name": "ステータスアップ", "effect": "武具の攻防が1.3倍になる。", "statEffect": {"type": "status_multiplier", "value": 1.3}}, {"weapon": "正宗", "armor": "正宗紋の鎧", "name": "白刃取り", "effect": "敵の一撃目の攻撃を完全に無効化する。"}, {"weapon": "プラチナソード", "armor": "プラチナメイル", "name": "ランダムアップ", "effect": "戦闘開始時に攻撃か防御のどちらかが20%上昇する。攻防比1:1。戦闘終了時に元へ戻る。確率1/2程度で発動。"}, {"weapon": "ブラッドソード", "armor": "ブラッドメイル", "name": "ドレイン", "effect": "攻撃時にライフを吸収する。確率1/5程度で発動。回復量は与ダメの10%。"}, {"weapon": "妖刀黒雫", "armor": "ダークメイル", "name": "一撃死", "effect": "ランダムで敵を即死させる。確率1/4程度で発動。"}, {"weapon": "妖刀黒雫", "armor": "黒霧の衣", "name": "居合い斬り", "effect": "1ターン目の勇者の攻撃が全てクリティカルになる。"}, {"weapon": "エンハンスソード", "armor": "エンハンスメイル", "name": "ピンチにクリティカル", "effect": "瀕死時にクリティカル攻撃率UP"}, {"weapon": "ルーンブレイド", "armor": "ルーンメイル", "name": "光探し", "effect": "聖なる光の効果が2倍"}, {"weapon": "クレイモア", "armor": "ハイランドメイル", "name": "毒耐性", "effect": "竜神の古都にて、青い毒草(防御成長率低下)を必ず無効化する。"}, {"weapon": "レイピア", "armor": "チェインメイル", "name": "防御力ダメージ", "effect": "敵に攻撃があたった場合、敵の防御力をさげる。"}, {"weapon": "ダンスソード", "armor": "身かわしの鎧", "name": "先制攻撃", "effect": "先制攻撃率UP"}, {"weapon": "ダンスソード", "armor": "身かわしの鎧", "name": "逃亡阻止", "effect": "敵が逃げにくくなる。"}, {"weapon": "水龍の剣", "armor": "バスターメイル", "name": "水龍バスター", "effect": "水龍への与ダメージ1.5倍"}, {"weapon": "水龍の剣", "armor": "龍鱗の鎧", "name": "水龍ドロップアップ", "effect": "水龍ドロップ率UP"}, {"weapon": "ダークブレイド", "armor": "ダークメイル", "name": "負ステータス耐性", "effect": "装備・アイテムが持つ負の基本値補正・負の成長値補正を打ち消して0にする。"}, {"weapon": "アークブレイド", "armor": "バスターメイル", "name": "アークドラゴンバスター", "effect": "アークドラゴンへの与ダメージ1.5倍"}, {"weapon": "アークブレイド", "armor": "アークメイル", "name": "アークドラゴンドロップアップ", "effect": "アークドラゴンのドロップ率UP"}, {"weapon": "竜神の剣", "armor": "バスターメイル", "name": "竜神バスター", "effect": "竜神の怨念への与ダメージ1.5倍"}, {"weapon": "竜神の剣", "armor": "龍鱗の鎧", "name": "龍神ドロップアップ", "effect": "竜神の怨念のドロップ率UP"}, {"weapon": "光輝の剣", "armor": "太陽の鎧", "name": "瀕死時に回復", "effect": "瀕死時一度だけ全回復、HP20%以下で発動する。"}, {"weapon": "漆黒の剣", "armor": "漆黒の鎧", "name": "闇の空", "effect": "特定敵の出現時間制限を解除。"}, {"weapon": "くない", "armor": "忍装束", "name": "3連続攻撃", "effect": "通常攻撃に加え、敵の行動前に2回追加攻撃する。攻撃1回あたりの与ダメは本来の1/3程になる。"}, {"weapon": "鉄のナイフ", "armor": "鉄の鎧", "name": "連続攻撃(微)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の50%程になる。"}, {"weapon": "銀のナイフ", "armor": "銀の鎧", "name": "連続攻撃(弱)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の55%程になる。"}, {"weapon": "金のナイフ", "armor": "金の鎧", "name": "連続攻撃(中)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の60%程になる。"}, {"weapon": "ダイヤのナイフ", "armor": "ダイヤの鎧", "name": "連続攻撃(強)", "effect": "通常攻撃に加え、敵の行動前に追加攻撃する。攻撃1回あたりの与ダメは本来の65%程になる。"}, {"weapon": "鉄の剣", "armor": "甲冑", "name": "城守", "effect": "漆黒の古城で受けるダメージを25%減少する。"}, {"weapon": "鉄の剣", "armor": "鉄の鎧", "name": "運アップ(微)", "effect": "運の初期補正が10UP", "statEffect": {"type": "luk", "value": 10}}, {"weapon": "銀の剣", "armor": "銀の鎧", "name": "運アップ(弱)", "effect": "運の初期補正が20UP", "statEffect": {"type": "luk", "value": 20}}, {"weapon": "金の剣", "armor": "金の鎧", "name": "運アップ(中)", "effect": "運の初期補正が30UP", "statEffect": {"type": "luk", "value": 30}}, {"weapon": "ダイヤの剣", "armor": "ダイヤの鎧", "name": "運アップ(強)", "effect": "運の初期補正が40UP", "statEffect": {"type": "luk", "value": 40}}, {"weapon": "鉄の斧", "armor": "鉄の鎧", "name": "金貨泥棒(弱)", "effect": "攻撃時、金貨を入手。確率1%程度で発動。金貨とは別に強化鉱20を入手することもある。"}, {"weapon": "銀の斧", "armor": "銀の鎧", "name": "金貨泥棒(中)", "effect": "攻撃時、金貨を入手。確率2%程度で発動。"}, {"weapon": "金の斧", "armor": "金の鎧", "name": "金貨泥棒(強)", "effect": "攻撃時、金貨を入手。確率3%程度で発動。"}, {"weapon": "チョコバー", "armor": "クッキーメイル", "name": "敵寄せ(強)", "effect": "敵とのエンカウント率がUP。敵寄せ(弱)+敵寄せ(強)で1.3倍程度になる。"}, {"weapon": "桜橘の刀", "armor": "菱餅大鎧", "name": "硬化", "effect": "敵の攻撃をくらうと防御力が上がるが、ターン経過ごとに攻撃力が下がる。戦闘終了時に元に戻る。"}, {"weapon": "粋夏の刀", "armor": "太陽の鎧", "name": "目くらまし", "effect": "敵が攻撃をしたとき、ランダムでその攻撃を無効化する。確率1/3程度で発動。"}, {"weapon": "粽大刀", "armor": "端午の鎧", "name": "端午", "effect": "現在HPの下一桁が5になった場合、攻撃力または防御力が5上昇する。攻防比1:1。"}, {"weapon": "アニバーサリーソード", "armor": "アニバーサリーメイル", "name": "超記念効果", "effect": "記念効果の効果が前後1分まで拡大する。"}, {"weapon": "セラミックソード", "armor": "セラミックメイル", "name": "基本値アップ", "effect": "攻撃と防御の出発時補正値+30", "statEffect": {"type": "atkdef_init", "value": 30}}];
 
-
 const STAT_LABEL = {HP:'HP', ATK:'攻撃', DEF:'防御', EVA:'回避', LUK:'運'};
 const STATS = ['HP','ATK','DEF','EVA','LUK'];
 
 function sumMods(){
-  // accumulate mods from arguments (objects of stat->num)
   const out = {};
   for (const obj of arguments){
     if (!obj) continue;
@@ -727,7 +519,7 @@ function calcExpStartLevel(expBonus){
   let level = 1;
   let cumulative = 0;
   while (true){
-    const need = level*level*10; // exp to go from `level` to `level+1`
+    const need = level*level*10;
     if (cumulative + need > expBonus) break;
     cumulative += need;
     level += 1;
@@ -799,15 +591,13 @@ function calcFromEquip(weapon, weaponPlus, armor, armorPlus, item1, item2, resoM
   const hasMochi = [item1, item2].some(it => it.special === 'doubleWeaponInit');
   let weaponInitAtk = weapon.initAtk * (hasMochi ? 2 : 1) + weaponPlus;
   let armorInitDef = armor.initDef + armorPlus;
-  // 光輝の剣: 防具の初期値+強化値を30%増(切り上げ) / 太陽の鎧: 武器の初期値+強化値を30%増(切り上げ)。ペア相手を問わず、装備しているだけで発動する固有効果。成長補正には影響しない。
+
   if (specialMods.weaponInitMult !== 1) weaponInitAtk = Math.ceil(weaponInitAtk * specialMods.weaponInitMult);
   if (specialMods.armorInitMult !== 1) armorInitDef = Math.ceil(armorInitDef * specialMods.armorInitMult);
 
   const itemInit = sumMods(item1.initMods, item2.initMods);
   const itemGrowth = sumMods(item1.growthMods, item2.growthMods);
 
-  // 「武具の攻防」= 武器の初期値+強化値 と、防具の基本値によるATK加算 をまとめてステータスアップ倍率の対象とし、
-  // 基本値アップ(+30)は倍率適用後に加算する。防具側も対称に扱う。アイテム由来の加算は倍率の対象外。
   const atkBundle = (weaponInitAtk + (armor.baseMods.ATK||0)) * resoMods.statusMultiplier + resoMods.atkDefInitBonus;
   const defBundle = (armorInitDef + (weapon.baseMods.DEF||0)) * resoMods.statusMultiplier + resoMods.atkDefInitBonus;
 
@@ -913,7 +703,6 @@ function rawStatAtLevel(state, stat, level){
 }
 
 function statAtLevel(state, stat, level){
-  // 四捨五入(0.5は繰り上げ)して判定に使う
   return Math.round(rawStatAtLevel(state, stat, level));
 }
 
@@ -942,9 +731,7 @@ const els = {};
  'armorSel','armorSel2','armorPlus','armorPlusInput','armorPlusMaxLabel',
  'item1Sel','item2Sel','baseStatGrid','growthStatGrid','equipSummary','resonanceList',
  'scoreNum','mobileScoreNum','startLvNote','criteriaTable','levelTable','runOptBtn','optStatus','optList','themeToggle',
- 'incRare','incJukujitsu',
- 'weaponsJson','armorsJson','itemsJson','applyDataBtn','dataEditorStatus',
- 'addWeaponBtn','addArmorBtn','addItemBtn','addFormStatus'
+ 'incRare','incJukujitsu'
 ].forEach(id => els[id] = document.getElementById(id));
 
 function populateSelect(sel, list, mapLabel){
@@ -955,7 +742,7 @@ function populatePrimarySelect(sel, list, mapLabel, noneLabel){
   let html = `<option value="-1">${noneLabel}</option>`;
   html += list.map((it, i) => `<option value="${i}">${mapLabel(it)}</option>`).join('');
   sel.innerHTML = html;
-  sel.value = '0'; // デフォルトは先頭の武器/防具を選択(未選択ではない)
+  sel.value = '0';
 }
 
 populatePrimarySelect(els.weaponSel, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax})`, 'なし(武器を装備しない)');
@@ -971,7 +758,6 @@ function populateSynthSelect(sel, list, mapLabel, excludeIndex){
     html += `<option value="${i}">${mapLabel(it)}</option>`;
   });
   sel.innerHTML = html;
-  // 直前の選択が引き続き有効ならそれを維持、そうでなければ「なし」に戻す
   const hasPrev = [...sel.options].some(o => o.value === prev);
   sel.value = (hasPrev && prev !== String(excludeIndex)) ? prev : '-1';
 }
@@ -1085,7 +871,6 @@ els.armorPlusInput.addEventListener('input', () => {
 });
 els.armorPlusInput.addEventListener('blur', () => { els.armorPlusInput.value = els.armorPlus.value; });
 
-// theme toggle
 (function(){
   let mode = null;
   els.themeToggle.addEventListener('click', () => {
@@ -1097,11 +882,9 @@ els.armorPlusInput.addEventListener('blur', () => { els.armorPlusInput.value = e
   });
 })();
 
-// optimizer
 function getWeaponSearchCandidates(){
   const i1 = +els.weaponSel.value;
   if (i1 === -1){
-    // 武器が未選択の場合、全武器を候補として(合成なし・強化値は上限)探索する
     return DATA.weapons.map((w, i) => ({
       obj: { name: w.name, initAtk: w.initAtk, plusMax: w.plusMax, baseMods: w.baseMods, growthMods: w.growthMods },
       plus: w.plusMax,
@@ -1209,130 +992,7 @@ function runOptimizerSearch(){
   });
 }
 
-// データ管理(武器・防具・アイテムのJSON編集)
-function refreshDataEditorTextareas(){
-  els.weaponsJson.value = JSON.stringify(DATA.weapons, null, 1);
-  els.armorsJson.value = JSON.stringify(DATA.armors, null, 1);
-  // 先頭の「なし(装備しない)」はツールが自動追加する特殊枠なので編集対象から除く
-  els.itemsJson.value = JSON.stringify(DATA.items.slice(1), null, 1);
-}
-refreshDataEditorTextareas();
-
-document.querySelectorAll('.mini-btn[data-copy]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const ta = document.getElementById(btn.dataset.copy);
-    ta.select();
-    navigator.clipboard && navigator.clipboard.writeText(ta.value).then(() => {
-      const orig = btn.textContent;
-      btn.textContent = 'コピー済';
-      setTimeout(() => { btn.textContent = orig; }, 1200);
-    }).catch(() => {});
-  });
-});
-
-els.applyDataBtn.addEventListener('click', () => {
-  let weapons, armors, items;
-  try {
-    weapons = JSON.parse(els.weaponsJson.value);
-    armors = JSON.parse(els.armorsJson.value);
-    items = JSON.parse(els.itemsJson.value);
-    if (!Array.isArray(weapons) || !Array.isArray(armors) || !Array.isArray(items)){
-      throw new Error('それぞれ配列([...])形式で入力してください');
-    }
-  } catch (e){
-    els.dataEditorStatus.textContent = `JSONの読み取りに失敗しました: ${e.message}`;
-    return;
-  }
-  DATA.weapons = weapons;
-  DATA.armors = armors;
-  DATA.items = items;
-  DATA.items.unshift({ name: 'なし(装備しない)', initMods: {}, growthMods: {}, special: null });
-
-  populatePrimarySelect(els.weaponSel, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax})`, 'なし(武器を装備しない)');
-  populatePrimarySelect(els.armorSel, DATA.armors, a => `${a.name}(初期${a.initDef}/上限+${a.plusMax})`, 'なし(防具を装備しない)');
-  populateSelect(els.item1Sel, DATA.items, it => it.name);
-  populateSelect(els.item2Sel, DATA.items, it => it.name);
-  refreshSynthSelects();
-  refreshPlusRanges();
-  syncPlusInputsFromRange();
-  els.dataEditorStatus.textContent = `反映しました(武器${weapons.length}件/防具${armors.length}件/アイテム${items.length}件)。選択欄は先頭にリセットされています。`;
-  render();
-});
-
-// フォームからの追加
-function numOrZero(id){
-  const v = document.getElementById(id).value.trim();
-  if (v === '') return 0;
-  const n = Number(v);
-  return isNaN(n) ? 0 : n;
-}
-function buildModsFromFields(pairs){
-  const out = {};
-  pairs.forEach(([key, id]) => {
-    const v = numOrZero(id);
-    if (v !== 0) out[key] = v;
-  });
-  return out;
-}
-function clearFields(ids){ ids.forEach(id => { const el = document.getElementById(id); if (el.tagName === 'SELECT') el.value = ''; else el.value = ''; }); }
-
-els.addWeaponBtn.addEventListener('click', () => {
-  const name = document.getElementById('wAddName').value.trim();
-  if (!name){ els.addFormStatus.textContent = '武器の名前を入力してください。'; return; }
-  const w = {
-    name,
-    initAtk: numOrZero('wAddInit'),
-    plusMax: numOrZero('wAddPlusMax'),
-    baseMods: buildModsFromFields([['HP','wAddBaseHP'],['DEF','wAddBaseDEF'],['EVA','wAddBaseEVA'],['LUK','wAddBaseLUK']]),
-    growthMods: buildModsFromFields([['HP','wAddGrowHP'],['ATK','wAddGrowATK'],['DEF','wAddGrowDEF'],['EVA','wAddGrowEVA'],['LUK','wAddGrowLUK']]),
-  };
-  DATA.weapons.push(w);
-  populatePrimarySelect(els.weaponSel, DATA.weapons, w => `${w.name}(初期${w.initAtk}/上限+${w.plusMax})`, 'なし(武器を装備しない)');
-  refreshSynthSelects();
-  refreshDataEditorTextareas();
-  clearFields(['wAddName','wAddInit','wAddPlusMax','wAddBaseHP','wAddBaseDEF','wAddBaseEVA','wAddBaseLUK','wAddGrowHP','wAddGrowATK','wAddGrowDEF','wAddGrowEVA','wAddGrowLUK']);
-  els.addFormStatus.textContent = `武器「${name}」を追加しました(武器選択欄の末尾に追加されています)。`;
-  render();
-});
-
-els.addArmorBtn.addEventListener('click', () => {
-  const name = document.getElementById('aAddName').value.trim();
-  if (!name){ els.addFormStatus.textContent = '防具の名前を入力してください。'; return; }
-  const a = {
-    name,
-    initDef: numOrZero('aAddInit'),
-    plusMax: numOrZero('aAddPlusMax'),
-    baseMods: buildModsFromFields([['HP','aAddBaseHP'],['ATK','aAddBaseATK'],['EVA','aAddBaseEVA'],['LUK','aAddBaseLUK']]),
-    growthMods: buildModsFromFields([['HP','aAddGrowHP'],['ATK','aAddGrowATK'],['DEF','aAddGrowDEF'],['EVA','aAddGrowEVA'],['LUK','aAddGrowLUK']]),
-  };
-  DATA.armors.push(a);
-  populatePrimarySelect(els.armorSel, DATA.armors, a => `${a.name}(初期${a.initDef}/上限+${a.plusMax})`, 'なし(防具を装備しない)');
-  refreshSynthSelects();
-  refreshDataEditorTextareas();
-  clearFields(['aAddName','aAddInit','aAddPlusMax','aAddBaseHP','aAddBaseATK','aAddBaseEVA','aAddBaseLUK','aAddGrowHP','aAddGrowATK','aAddGrowDEF','aAddGrowEVA','aAddGrowLUK']);
-  els.addFormStatus.textContent = `防具「${name}」を追加しました(防具選択欄の末尾に追加されています)。`;
-  render();
-});
-
-els.addItemBtn.addEventListener('click', () => {
-  const name = document.getElementById('iAddName').value.trim();
-  if (!name){ els.addFormStatus.textContent = 'アイテムの名前を入力してください。'; return; }
-  const specialVal = document.getElementById('iAddSpecial').value || null;
-  const it = {
-    name,
-    initMods: buildModsFromFields([['HP','iAddInitHP'],['ATK','iAddInitATK'],['DEF','iAddInitDEF'],['EVA','iAddInitEVA'],['LUK','iAddInitLUK'],['EXP','iAddInitEXP']]),
-    growthMods: buildModsFromFields([['HP','iAddGrowHP'],['ATK','iAddGrowATK'],['DEF','iAddGrowDEF'],['EVA','iAddGrowEVA'],['LUK','iAddGrowLUK']]),
-    special: specialVal,
-  };
-  DATA.items.push(it);
-  populateSelect(els.item1Sel, DATA.items, it => it.name);
-  populateSelect(els.item2Sel, DATA.items, it => it.name);
-  refreshDataEditorTextareas();
-  clearFields(['iAddName','iAddInitHP','iAddInitATK','iAddInitDEF','iAddInitEVA','iAddInitLUK','iAddInitEXP','iAddGrowHP','iAddGrowATK','iAddGrowDEF','iAddGrowEVA','iAddGrowLUK','iAddSpecial']);
-  els.addFormStatus.textContent = `アイテム「${name}」を追加しました(アイテム選択欄の末尾に追加されています)。`;
-  render();
-});
-
+// 初回レンダリング
 render();
 </script>
 </body>
